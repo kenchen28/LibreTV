@@ -960,8 +960,8 @@ async function showDetails(id, vod_name, sourceCode) {
                         </button>
                         <span class="text-gray-500 text-sm">共 ${data.episodes.length} 集</span>
                     </div>
-                    <button onclick="copyLinks()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors">
-                        复制链接
+                    <button onclick="playVideo(currentEpisodes[0], '${vod_name.replace(/'/g, "\\'")}', '${sourceCode}', 0, '${id}')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors">
+                        播放
                     </button>
                 </div>
                 <div id="episodesGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
