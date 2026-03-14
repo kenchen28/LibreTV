@@ -376,19 +376,6 @@ function renderDoubanTags(tags) {
     });
 }
 
-// 设置换一批按钮事件
-function setupDoubanRefreshBtn() {
-    const btn = document.getElementById('douban-refresh');
-    if (!btn) return;
-
-    btn.onclick = function() {
-        // Reset and reload from beginning with new random offset
-        doubanPageStart = 0;
-        doubanNoMore = false;
-        removeDoubanSentinel();
-        renderRecommend(doubanCurrentTag, doubanPageSize, doubanPageStart, false);
-    };
-}
 
 // Infinite scroll sentinel setup
 function setupDoubanSentinel() {
