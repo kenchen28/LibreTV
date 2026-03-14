@@ -489,6 +489,24 @@ export async function onRequest(context) {
         return processedVariant;
     }
 
+    // 判断URL或Content-Type是否为二进制内容（图片等）
+    function isBinaryUrl(targetUrl) {
+        const binaryExtensions = /\.(jpg|jpeg|png|gif|webp|bmp|ico|svg|avif|tiff)(\?|$)/i;
+        // 豆瓣图片CDN的URL可能没有扩展名，但都是图片
+        if (targetUrl.includes('doubanio.com') || targetUrl.includes('img.douban.com')) {
+            return true;
+        }
+        return binaryExtensions.test(targetUrl);
+    }
+
+    function isBinaryContentType(contentType) {
+        if (!contentType) return false;
+        return contentType.startsWith('image/') || 
+               contentType.startsWith('audio/') || 
+               contentType.startsWith('video/') ||
+               contentType.includes('octet-stream');
+    }
+
     // --- 主要请求处理逻辑 ---
 
     try {
@@ -500,6 +518,36 @@ export async function onRequest(context) {
         }
 
         logDebug(`收到代理请求: ${targetUrl}`);
+
+        // --- 对图片/二进制内容使用直接流式代理，避免 text() 破坏二进制数据 ---
+        if (isBinaryUrl(targetUrl)) {
+            logDebug(`检测到二进制/图片URL，使用直接流式代理: ${targetUrl}`);
+            const headers = new Headers({
+                'User-Agent': getRandomUserAgent(),
+                'Accept': request.headers.get('Accept') || '*/*',
+                'Accept-Language': request.headers.get('Accept-Language') || 'zh-CN,zh;q=0.9,en;q=0.8',
+                'Referer': (targetUrl.includes('doubanio.com') || targetUrl.includes('douban.com'))
+                    ? 'https://movie.douban.com/'
+                    : (request.headers.get('Referer') || new URL(targetUrl).origin)
+            });
+
+            const response = await fetch(targetUrl, { headers, redirect: 'follow' });
+            if (!response.ok) {
+                throw new Error(`HTTP error ${response.status}: ${response.statusText}. URL: ${targetUrl}`);
+            }
+
+            const finalHeaders = new Headers(response.headers);
+            finalHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL}`);
+            finalHeaders.set('Access-Control-Allow-Origin', '*');
+            finalHeaders.set('Access-Control-Allow-Methods', 'GET, HEAD, POST, OPTIONS');
+            finalHeaders.set('Access-Control-Allow-Headers', '*');
+            // 移除可能导致问题的头
+            finalHeaders.delete('content-encoding');
+            finalHeaders.delete('content-length');
+
+            // 直接传递二进制 body，不经过 text() 转换
+            return new Response(response.body, { status: 200, headers: finalHeaders });
+        }
 
         // --- 缓存检查 (KV) ---
         const cacheKey = `proxy_raw:${targetUrl}`; // 使用原始内容的缓存键
@@ -542,6 +590,27 @@ export async function onRequest(context) {
 
         // --- 实际请求 ---
         const { content, contentType, responseHeaders } = await fetchContentWithType(targetUrl);
+
+        // --- 如果响应是二进制类型但URL没被检测到，重新用二进制方式获取 ---
+        if (isBinaryContentType(contentType)) {
+            logDebug(`响应Content-Type为二进制类型，重新用流式代理: ${targetUrl}`);
+            const headers = new Headers({
+                'User-Agent': getRandomUserAgent(),
+                'Accept': '*/*',
+                'Referer': (targetUrl.includes('doubanio.com') || targetUrl.includes('douban.com'))
+                    ? 'https://movie.douban.com/'
+                    : new URL(targetUrl).origin
+            });
+            const binaryResponse = await fetch(targetUrl, { headers, redirect: 'follow' });
+            if (binaryResponse.ok) {
+                const finalHeaders = new Headers(binaryResponse.headers);
+                finalHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL}`);
+                finalHeaders.set('Access-Control-Allow-Origin', '*');
+                finalHeaders.delete('content-encoding');
+                finalHeaders.delete('content-length');
+                return new Response(binaryResponse.body, { status: 200, headers: finalHeaders });
+            }
+        }
 
         // --- 写入缓存 (KV) ---
         if (kvNamespace) {
