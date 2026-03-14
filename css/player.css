@@ -274,7 +274,7 @@ div.player-loading-text {
 }
 
 input:checked + .slider {
-    background-color: #00ccff;
+    background-color: #4f46e5;
 }
 
 input:checked + .slider:before {

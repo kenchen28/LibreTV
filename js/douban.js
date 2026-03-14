@@ -65,7 +65,7 @@ function initDouban() {
         const toggleBg = doubanToggle.nextElementSibling;
         const toggleDot = toggleBg.nextElementSibling;
         if (isEnabled) {
-            toggleBg.classList.add('bg-pink-600');
+            toggleBg.classList.add('bg-indigo-600');
             toggleDot.classList.add('translate-x-6');
         }
         
@@ -76,10 +76,10 @@ function initDouban() {
             
             // 更新开关外观
             if (isChecked) {
-                toggleBg.classList.add('bg-pink-600');
+                toggleBg.classList.add('bg-indigo-600');
                 toggleDot.classList.add('translate-x-6');
             } else {
-                toggleBg.classList.remove('bg-pink-600');
+                toggleBg.classList.remove('bg-indigo-600');
                 toggleDot.classList.remove('translate-x-6');
             }
             
@@ -177,11 +177,11 @@ function fillAndSearch(title) {
             // 使用HTML5 History API更新URL，不刷新页面
             window.history.pushState(
                 { search: safeTitle }, 
-                `搜索: ${safeTitle} - LibreTV`, 
+                `搜索: ${safeTitle} - 优点TV`, 
                 `/s=${encodedQuery}`
             );
             // 更新页面标题
-            document.title = `搜索: ${safeTitle} - LibreTV`;
+            document.title = `搜索: ${safeTitle} - 优点TV`;
         } catch (e) {
             console.error('更新浏览器历史失败:', e);
         }
@@ -237,11 +237,11 @@ async function fillAndSearchWithDouban(title) {
             // 使用HTML5 History API更新URL，不刷新页面
             window.history.pushState(
                 { search: safeTitle }, 
-                `搜索: ${safeTitle} - LibreTV`, 
+                `搜索: ${safeTitle} - 优点TV`, 
                 `/s=${encodedQuery}`
             );
             // 更新页面标题
-            document.title = `搜索: ${safeTitle} - LibreTV`;
+            document.title = `搜索: ${safeTitle} - 优点TV`;
         } catch (e) {
             console.error('更新浏览器历史失败:', e);
         }
@@ -266,11 +266,11 @@ function renderDoubanMovieTvSwitch() {
     movieToggle.addEventListener('click', function() {
         if (doubanMovieTvCurrentSwitch !== 'movie') {
             // 更新按钮样式
-            movieToggle.classList.add('bg-pink-600', 'text-white');
-            movieToggle.classList.remove('text-gray-300');
+            movieToggle.classList.add('bg-indigo-600', 'text-white');
+            movieToggle.classList.remove('text-gray-600');
             
-            tvToggle.classList.remove('bg-pink-600', 'text-white');
-            tvToggle.classList.add('text-gray-300');
+            tvToggle.classList.remove('bg-indigo-600', 'text-white');
+            tvToggle.classList.add('text-gray-600');
             
             doubanMovieTvCurrentSwitch = 'movie';
             doubanCurrentTag = '热门';
@@ -292,11 +292,11 @@ function renderDoubanMovieTvSwitch() {
     tvToggle.addEventListener('click', function() {
         if (doubanMovieTvCurrentSwitch !== 'tv') {
             // 更新按钮样式
-            tvToggle.classList.add('bg-pink-600', 'text-white');
-            tvToggle.classList.remove('text-gray-300');
+            tvToggle.classList.add('bg-indigo-600', 'text-white');
+            tvToggle.classList.remove('text-gray-600');
             
-            movieToggle.classList.remove('bg-pink-600', 'text-white');
-            movieToggle.classList.add('text-gray-300');
+            movieToggle.classList.remove('bg-indigo-600', 'text-white');
+            movieToggle.classList.add('text-gray-600');
             
             doubanMovieTvCurrentSwitch = 'tv';
             doubanCurrentTag = '热门';
@@ -328,7 +328,7 @@ function renderDoubanTags(tags) {
 
     // 先添加标签管理按钮
     const manageBtn = document.createElement('button');
-    manageBtn.className = 'py-1.5 px-3.5 rounded text-sm font-medium transition-all duration-300 bg-[#1a1a1a] text-gray-300 hover:bg-pink-700 hover:text-white border border-[#333] hover:border-white';
+    manageBtn.className = 'py-1.5 px-3.5 rounded text-sm font-medium transition-all duration-300 bg-white text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 border border-[#e5e4de] hover:border-indigo-400';
     manageBtn.innerHTML = '<span class="flex items-center"><svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>管理标签</span>';
     manageBtn.onclick = function() {
         showTagManageModal();
@@ -344,9 +344,9 @@ function renderDoubanTags(tags) {
         
         // 当前选中的标签使用高亮样式
         if (tag === doubanCurrentTag) {
-            btnClass += 'bg-pink-600 text-white shadow-md border-white';
+            btnClass += 'bg-indigo-600 text-white shadow-md border-indigo-600';
         } else {
-            btnClass += 'bg-[#1a1a1a] text-gray-300 hover:bg-pink-700 hover:text-white border-[#333] hover:border-white';
+            btnClass += 'bg-white text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 border-[#e5e4de] hover:border-indigo-400';
         }
         
         btn.className = btnClass;
@@ -414,8 +414,8 @@ function renderRecommend(tag, pageLimit, pageStart) {
     const loadingOverlayHTML = `
         <div class="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-10">
             <div class="flex items-center justify-center">
-                <div class="w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full animate-spin inline-block"></div>
-                <span class="text-pink-500 ml-4">加载中...</span>
+                <div class="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin inline-block"></div>
+                <span class="text-indigo-500 ml-4">加载中...</span>
             </div>
         </div>
     `;
@@ -509,7 +509,7 @@ async function renderDoubanCards(data, container) {
         const emptyEl = document.createElement("div");
         emptyEl.className = "col-span-full text-center py-8";
         emptyEl.innerHTML = `
-            <div class="text-pink-500">❌ 暂无数据，请尝试其他分类或刷新</div>
+            <div class="text-indigo-500">❌ 暂无数据，请尝试其他分类或刷新</div>
         `;
         fragment.appendChild(emptyEl);
     } else {
@@ -527,7 +527,7 @@ async function renderDoubanCards(data, container) {
         // 循环创建每个影视卡片
         data.subjects.forEach((item, index) => {
             const card = document.createElement("div");
-            card.className = "bg-[#111] hover:bg-[#222] transition-all duration-300 rounded-lg overflow-hidden flex flex-col transform hover:scale-105 shadow-md hover:shadow-lg";
+            card.className = "bg-[#f5f4ee] hover:bg-[#eae9e3] transition-all duration-300 rounded-lg overflow-hidden flex flex-col transform hover:scale-105 shadow-md hover:shadow-lg";
 
             // 生成卡片内容，确保安全显示（防止XSS）
             const safeTitle = item.title
@@ -553,15 +553,15 @@ async function renderDoubanCards(data, container) {
                     <div class="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm">
                         <span class="text-yellow-400">★</span> ${safeRate}
                     </div>
-                    <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm hover:bg-[#333] transition-colors">
+                    <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm hover:bg-[#e5e4de] transition-colors">
                         <a href="${item.url}" target="_blank" rel="noopener noreferrer" title="在豆瓣查看" onclick="event.stopPropagation();">
                             🔗
                         </a>
                     </div>
                 </div>
-                <div class="p-2 text-center bg-[#111]">
+                <div class="p-2 text-center bg-[#f5f4ee]">
                     <button onclick="fillAndSearchWithDouban('${safeTitle}')"
-                            class="text-sm font-medium text-white truncate w-full hover:text-pink-400 transition"
+                            class="text-sm font-medium text-gray-800 truncate w-full hover:text-indigo-400 transition"
                             title="${safeTitle}">
                         ${safeTitle}
                     </button>
@@ -608,13 +608,13 @@ function showTagManageModal() {
     // 模态框内容
     modal.innerHTML = `
         <div class="bg-[#191919] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
-            <button id="closeTagModal" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">&times;</button>
+            <button id="closeTagModal" class="absolute top-4 right-4 text-gray-500 hover:text-indigo-600 text-xl">&times;</button>
             
-            <h3 class="text-xl font-bold text-white mb-4">标签管理 (${isMovie ? '电影' : '电视剧'})</h3>
+            <h3 class="text-xl font-bold text-gray-800 mb-4">标签管理 (${isMovie ? '电影' : '电视剧'})</h3>
             
             <div class="mb-4">
                 <div class="flex justify-between items-center mb-2">
-                    <h4 class="text-lg font-medium text-gray-300">标签列表</h4>
+                    <h4 class="text-lg font-medium text-gray-600">标签列表</h4>
                     <button id="resetTagsBtn" class="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded">
                         恢复默认标签
                     </button>
@@ -624,7 +624,7 @@ function showTagManageModal() {
                         // "热门"标签不能删除
                         const canDelete = tag !== '热门';
                         return `
-                            <div class="bg-[#1a1a1a] text-gray-300 py-1.5 px-3 rounded text-sm font-medium flex justify-between items-center group">
+                            <div class="bg-white text-gray-600 py-1.5 px-3 rounded text-sm font-medium flex justify-between items-center group">
                                 <span>${tag}</span>
                                 ${canDelete ? 
                                     `<button class="delete-tag-btn text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" 
@@ -639,11 +639,11 @@ function showTagManageModal() {
             </div>
             
             <div class="border-t border-gray-700 pt-4">
-                <h4 class="text-lg font-medium text-gray-300 mb-3">添加新标签</h4>
+                <h4 class="text-lg font-medium text-gray-600 mb-3">添加新标签</h4>
                 <form id="addTagForm" class="flex items-center">
                     <input type="text" id="newTagInput" placeholder="输入标签名称..." 
-                           class="flex-1 bg-[#222] text-white border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-pink-500">
-                    <button type="submit" class="ml-2 bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded">添加</button>
+                           class="flex-1 bg-[#eae9e3] text-gray-800 border border-[#e5e4de] rounded px-3 py-2 focus:outline-none focus:border-indigo-500">
+                    <button type="submit" class="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">添加</button>
                 </form>
                 <p class="text-xs text-gray-500 mt-2">提示：标签名称不能为空，不能重复，不能包含特殊字符</p>
             </div>

@@ -33,7 +33,7 @@
 .modal-title {
     font-size: 1.5rem;
     font-weight: 700;
-    background: linear-gradient(to right, #00ccff, #ff3c78);
+    background: linear-gradient(to right, #4f46e5, #4f46e5);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     word-break: break-word;

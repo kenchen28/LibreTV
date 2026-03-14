@@ -218,7 +218,7 @@ function initializePageContent() {
     }
 
     // 设置页面标题
-    document.title = currentVideoTitle + ' - LibreTV播放器';
+    document.title = currentVideoTitle + ' - 优点TV播放器';
     document.getElementById('videoTitle').textContent = currentVideoTitle;
 
     // 初始化播放器
@@ -834,22 +834,22 @@ function updateButtonStates() {
     // 处理上一集按钮
     if (currentEpisodeIndex > 0) {
         prevButton.classList.remove('bg-gray-700', 'cursor-not-allowed');
-        prevButton.classList.add('bg-[#222]', 'hover:bg-[#333]');
+        prevButton.classList.add('bg-[#eae9e3]', 'hover:bg-[#e5e4de]');
         prevButton.removeAttribute('disabled');
     } else {
         prevButton.classList.add('bg-gray-700', 'cursor-not-allowed');
-        prevButton.classList.remove('bg-[#222]', 'hover:bg-[#333]');
+        prevButton.classList.remove('bg-[#eae9e3]', 'hover:bg-[#e5e4de]');
         prevButton.setAttribute('disabled', '');
     }
 
     // 处理下一集按钮
     if (currentEpisodeIndex < currentEpisodes.length - 1) {
         nextButton.classList.remove('bg-gray-700', 'cursor-not-allowed');
-        nextButton.classList.add('bg-[#222]', 'hover:bg-[#333]');
+        nextButton.classList.add('bg-[#eae9e3]', 'hover:bg-[#e5e4de]');
         nextButton.removeAttribute('disabled');
     } else {
         nextButton.classList.add('bg-gray-700', 'cursor-not-allowed');
-        nextButton.classList.remove('bg-[#222]', 'hover:bg-[#333]');
+        nextButton.classList.remove('bg-[#eae9e3]', 'hover:bg-[#e5e4de]');
         nextButton.setAttribute('disabled', '');
     }
 }
@@ -860,7 +860,7 @@ function renderEpisodes() {
     if (!episodesList) return;
 
     if (!currentEpisodes || currentEpisodes.length === 0) {
-        episodesList.innerHTML = '<div class="col-span-full text-center text-gray-400 py-8">没有可用的集数</div>';
+        episodesList.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">没有可用的集数</div>';
         return;
     }
 
@@ -875,7 +875,7 @@ function renderEpisodes() {
         html += `
             <button id="episode-${realIndex}" 
                     onclick="playEpisode(${realIndex})" 
-                    class="px-4 py-2 ${isActive ? 'episode-active' : '!bg-[#222] hover:!bg-[#333] hover:!shadow-none'} !border ${isActive ? '!border-blue-500' : '!border-[#333]'} rounded-lg transition-colors text-center episode-btn">
+                    class="px-4 py-2 ${isActive ? 'episode-active' : '!bg-[#eae9e3] hover:!bg-[#e5e4de] hover:!shadow-none'} !border ${isActive ? '!border-blue-500' : '!border-[#e5e4de]'} rounded-lg transition-colors text-center episode-btn">
                 ${realIndex + 1}
             </button>
         `;
@@ -1691,7 +1691,7 @@ async function showSwitchResourceModal() {
                 </div>
                 <div class="mt-2">
                     <div class="text-xs font-medium text-gray-200 truncate">${result.vod_name}</div>
-                    <div class="text-[10px] text-gray-400 truncate">${sourceName}</div>
+                    <div class="text-[10px] text-gray-500 truncate">${sourceName}</div>
                     <div class="text-[10px] text-gray-500 mt-1">
                         ${speedResult.episodes ? `${speedResult.episodes}集` : ''}
                     </div>

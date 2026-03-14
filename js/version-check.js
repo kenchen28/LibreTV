@@ -37,8 +37,8 @@ async function checkForUpdates() {
         // 获取最新版本
         let latestVersion;
         const VERSION_URL = {
-            PROXY: 'https://ghfast.top/raw.githubusercontent.com/LibreSpark/LibreTV/main/VERSION.txt',
-            DIRECT: 'https://raw.githubusercontent.com/LibreSpark/LibreTV/main/VERSION.txt'
+            PROXY: 'https://ghfast.top/raw.githubusercontent.com/LibreSpark/优点TV/main/VERSION.txt',
+            DIRECT: 'https://raw.githubusercontent.com/LibreSpark/优点TV/main/VERSION.txt'
         };
         const FETCH_TIMEOUT = 1500;
         
@@ -112,7 +112,7 @@ function formatVersion(versionString) {
 function createErrorVersionElement(errorMessage) {
     const errorElement = document.createElement('p');
     errorElement.className = 'text-gray-500 text-sm mt-1 text-center md:text-left';
-    errorElement.innerHTML = `版本: <span class="text-amber-500">检测失败</span>`;
+    // errorElement.innerHTML = `版本: <span class="text-amber-500">检测失败</span>`;
     errorElement.title = errorMessage;
     return errorElement;
 }
@@ -133,7 +133,7 @@ function addVersionInfoToFooter() {
         versionElement.className = 'text-gray-500 text-sm mt-1 text-center md:text-left';
         
         // 添加当前版本信息
-        versionElement.innerHTML = `版本: ${result.currentFormatted}`;
+        // versionElement.innerHTML = `版本: ${result.currentFormatted}`;
         
         // 如果有更新，添加更新提示
         if (result.hasUpdate) {
@@ -148,13 +148,13 @@ function addVersionInfoToFooter() {
                 const updateBtn = versionElement.querySelector('span');
                 if (updateBtn) {
                     updateBtn.addEventListener('click', () => {
-                        window.open('https://github.com/LibreSpark/LibreTV', '_blank');
+                        window.open('https://github.com/LibreSpark/优点TV', '_blank');
                     });
                 }
             }, 100);
         } else {
             // 如果没有更新，显示当前版本为最新版本
-            versionElement.innerHTML = `版本: ${result.currentFormatted} <span class="text-green-500">(最新版本)</span>`;
+            // versionElement.innerHTML = `版本: ${result.currentFormatted} <span class="text-green-500">(最新版本)</span>`;
         }
         
         // 显示版本元素

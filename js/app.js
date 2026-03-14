@@ -86,10 +86,10 @@ function initAPICheckboxes() {
         checkbox.className = 'flex items-center';
         checkbox.innerHTML = `
             <input type="checkbox" id="api_${apiKey}" 
-                   class="form-checkbox h-3 w-3 text-blue-600 bg-[#222] border border-[#333]" 
+                   class="form-checkbox h-3 w-3 text-blue-600 bg-[#eae9e3] border border-[#e5e4de]" 
                    ${checked ? 'checked' : ''} 
                    data-api="${apiKey}">
-            <label for="api_${apiKey}" class="ml-1 text-xs text-gray-400 truncate">${api.name}</label>
+            <label for="api_${apiKey}" class="ml-1 text-xs text-gray-500 truncate">${api.name}</label>
         `;
         normaldiv.appendChild(checkbox);
 
@@ -138,10 +138,10 @@ function addAdultAPI() {
             checkbox.className = 'flex items-center';
             checkbox.innerHTML = `
                 <input type="checkbox" id="api_${apiKey}" 
-                       class="form-checkbox h-3 w-3 text-blue-600 bg-[#222] border border-[#333] api-adult" 
+                       class="form-checkbox h-3 w-3 text-blue-600 bg-[#eae9e3] border border-[#e5e4de] api-adult" 
                        ${checked ? 'checked' : ''} 
                        data-api="${apiKey}">
-                <label for="api_${apiKey}" class="ml-1 text-xs text-pink-400 truncate">${api.name}</label>
+                <label for="api_${apiKey}" class="ml-1 text-xs text-indigo-400 truncate">${api.name}</label>
             `;
             adultdiv.appendChild(checkbox);
 
@@ -180,7 +180,7 @@ function checkAdultAPIsSelected() {
 
         // 修改描述文字
         if (filterDescription) {
-            filterDescription.innerHTML = '<strong class="text-pink-300">选中黄色资源站时无法启用此过滤</strong>';
+            filterDescription.innerHTML = '<strong class="text-indigo-300">选中黄色资源站时无法启用此过滤</strong>';
         }
 
         // 移除提示信息（如果存在）
@@ -219,11 +219,11 @@ function renderCustomAPIsList() {
     container.innerHTML = '';
     customAPIs.forEach((api, index) => {
         const apiItem = document.createElement('div');
-        apiItem.className = 'flex items-center justify-between p-1 mb-1 bg-[#222] rounded';
-        const textColorClass = api.isAdult ? 'text-pink-400' : 'text-white';
-        const adultTag = api.isAdult ? '<span class="text-xs text-pink-400 mr-1">(18+)</span>' : '';
+        apiItem.className = 'flex items-center justify-between p-1 mb-1 bg-[#eae9e3] rounded';
+        const textColorClass = api.isAdult ? 'text-indigo-400' : 'text-white';
+        const adultTag = api.isAdult ? '<span class="text-xs text-indigo-400 mr-1">(18+)</span>' : '';
         // 新增 detail 地址显示
-        const detailLine = api.detail ? `<div class="text-xs text-gray-400 truncate">detail: ${api.detail}</div>` : '';
+        const detailLine = api.detail ? `<div class="text-xs text-gray-500 truncate">detail: ${api.detail}</div>` : '';
         apiItem.innerHTML = `
             <div class="flex items-center flex-1 min-w-0">
                 <input type="checkbox" id="custom_api_${index}" 
@@ -584,11 +584,11 @@ function resetSearchArea() {
     try {
         window.history.pushState(
             {},
-            `LibreTV - 免费在线视频搜索与观看平台`,
+            `优点TV - 免费在线视频搜索与观看平台`,
             `/`
         );
         // 更新页面标题
-        document.title = `LibreTV - 免费在线视频搜索与观看平台`;
+        document.title = `优点TV - 免费在线视频搜索与观看平台`;
     } catch (e) {
         console.error('更新浏览器历史失败:', e);
     }
@@ -693,7 +693,7 @@ async function search() {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                               d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <h3 class="mt-2 text-lg font-medium text-gray-400">没有找到匹配的结果</h3>
+                    <h3 class="mt-2 text-lg font-medium text-gray-500">没有找到匹配的结果</h3>
                     <p class="mt-1 text-sm text-gray-500">请尝试其他关键词或更换数据源</p>
                 </div>
             `;
@@ -708,11 +708,11 @@ async function search() {
             // 使用HTML5 History API更新URL，不刷新页面
             window.history.pushState(
                 { search: query },
-                `搜索: ${query} - LibreTV`,
+                `搜索: ${query} - 优点TV`,
                 `/s=${encodedQuery}`
             );
             // 更新页面标题
-            document.title = `搜索: ${query} - LibreTV`;
+            document.title = `搜索: ${query} - 优点TV`;
         } catch (e) {
             console.error('更新浏览器历史失败:', e);
             // 如果更新URL失败，继续执行搜索
@@ -736,7 +736,7 @@ async function search() {
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;');
             const sourceInfo = item.source_name ?
-                `<span class="bg-[#222] text-xs px-1.5 py-0.5 rounded-full">${item.source_name}</span>` : '';
+                `<span class="bg-[#eae9e3] text-xs px-1.5 py-0.5 rounded-full">${item.source_name}</span>` : '';
             const sourceCode = item.source_code || '';
 
             // 添加API URL属性，用于详情获取
@@ -747,7 +747,7 @@ async function search() {
             const hasCover = item.vod_pic && item.vod_pic.startsWith('http');
 
             return `
-                <div class="card-hover bg-[#111] rounded-lg overflow-hidden cursor-pointer transition-all hover:scale-[1.02] h-full shadow-sm hover:shadow-md" 
+                <div class="card-hover bg-[#f5f4ee] rounded-lg overflow-hidden cursor-pointer transition-all hover:scale-[1.02] h-full shadow-sm hover:shadow-md" 
                      onclick="showDetails('${safeId}','${safeName}','${sourceCode}')" ${apiUrlAttr}>
                     <div class="flex h-full">
                         ${hasCover ? `
@@ -773,7 +773,7 @@ async function search() {
                                           ${item.vod_year}
                                       </span>` : ''}
                                 </div>
-                                <p class="text-gray-400 line-clamp-2 overflow-hidden ${hasCover ? '' : 'text-center'} mb-2">
+                                <p class="text-gray-500 line-clamp-2 overflow-hidden ${hasCover ? '' : 'text-center'} mb-2">
                                     ${(item.vod_remarks || '暂无介绍').toString().replace(/</g, '&lt;')}
                                 </p>
                             </div>
@@ -906,7 +906,7 @@ async function showDetails(id, vod_name, sourceCode) {
 
         // 显示来源信息
         const sourceName = data.videoInfo && data.videoInfo.source_name ?
-            ` <span class="text-sm font-normal text-gray-400">(${data.videoInfo.source_name})</span>` : '';
+            ` <span class="text-sm font-normal text-gray-500">(${data.videoInfo.source_name})</span>` : '';
 
         // 不对标题进行截断处理，允许完整显示
         modalTitle.innerHTML = `<span class="break-words">${vod_name || '未知视频'}</span>${sourceName}`;
@@ -952,13 +952,13 @@ async function showDetails(id, vod_name, sourceCode) {
                 <div class="flex flex-wrap items-center justify-between mb-4 gap-2">
                     <div class="flex items-center gap-2">
                         <button onclick="toggleEpisodeOrder('${sourceCode}', '${id}')" 
-                                class="px-3 py-1.5 bg-[#333] hover:bg-[#444] border border-[#444] rounded text-sm transition-colors flex items-center gap-1">
+                                class="px-3 py-1.5 bg-[#e5e4de] hover:bg-[#444] border border-[#d5d4ce] rounded text-sm transition-colors flex items-center gap-1">
                             <svg class="w-4 h-4 transform ${episodesReversed ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
                             </svg>
                             <span>${episodesReversed ? '正序排列' : '倒序排列'}</span>
                         </button>
-                        <span class="text-gray-400 text-sm">共 ${data.episodes.length} 集</span>
+                        <span class="text-gray-500 text-sm">共 ${data.episodes.length} 集</span>
                     </div>
                     <button onclick="copyLinks()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors">
                         复制链接
@@ -1099,7 +1099,7 @@ function renderEpisodes(vodName, sourceCode, vodId) {
         const realIndex = episodesReversed ? currentEpisodes.length - 1 - index : index;
         return `
             <button id="episode-${realIndex}" onclick="playVideo('${episode}','${vodName.replace(/"/g, '&quot;')}', '${sourceCode}', ${realIndex}, '${vodId}')" 
-                    class="px-4 py-2 bg-[#222] hover:bg-[#333] border border-[#333] rounded-lg transition-colors text-center episode-btn">
+                    class="px-4 py-2 bg-[#eae9e3] hover:bg-[#e5e4de] border border-[#e5e4de] rounded-lg transition-colors text-center episode-btn">
                 ${realIndex + 1}
             </button>
         `;
@@ -1151,13 +1151,13 @@ async function importConfigFromUrl() {
 
     modal.innerHTML = `
         <div class="bg-[#191919] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
-            <button id="closeUrlModal" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">&times;</button>
+            <button id="closeUrlModal" class="absolute top-4 right-4 text-gray-500 hover:text-indigo-600 text-xl">&times;</button>
             
             <h3 class="text-xl font-bold mb-4">从URL导入配置</h3>
             
             <div class="mb-4">
                 <input type="text" id="configUrl" placeholder="输入配置文件URL" 
-                       class="w-full px-3 py-2 bg-[#222] border border-[#333] rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                       class="w-full px-3 py-2 bg-[#eae9e3] border border-[#e5e4de] rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-500">
             </div>
             
             <div class="flex justify-end space-x-2">
@@ -1217,7 +1217,7 @@ async function importConfigFromUrl() {
             }
 
             const config = await response.json();
-            if (config.name !== 'LibreTV-Settings') throw '配置文件格式不正确';
+            if (config.name !== '优点TV-Settings') throw '配置文件格式不正确';
 
             // 验证哈希
             const dataHash = await sha256(JSON.stringify(config.data));
@@ -1269,7 +1269,7 @@ async function importConfig() {
 
             // 解析并验证配置
             const config = JSON.parse(content);
-            if (config.name !== 'LibreTV-Settings') throw '配置文件格式不正确';
+            if (config.name !== '优点TV-Settings') throw '配置文件格式不正确';
 
             // 验证哈希
             const dataHash = await sha256(JSON.stringify(config.data));
@@ -1326,14 +1326,14 @@ async function exportConfig() {
     }
 
     const times = Date.now().toString();
-    config['name'] = 'LibreTV-Settings';  // 配置文件名，用于校验
+    config['name'] = '优点TV-Settings';  // 配置文件名，用于校验
     config['time'] = times;               // 配置文件生成时间
     config['cfgVer'] = '1.0.0';           // 配置文件版本
     config['data'] = items;               // 配置文件数据
     config['hash'] = await sha256(JSON.stringify(config['data']));  // 计算数据的哈希值，用于校验
 
     // 将配置数据保存为 JSON 文件
-    saveStringAsFile(JSON.stringify(config), 'LibreTV-Settings_' + times + '.json');
+    saveStringAsFile(JSON.stringify(config), '优点TV-Settings_' + times + '.json');
 }
 
 // 将字符串保存为文件
