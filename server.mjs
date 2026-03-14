@@ -178,6 +178,14 @@ app.get('/proxy/:encodedUrl', async (req, res) => {
     const maxRetries = config.maxRetries;
     let retries = 0;
     
+    // 为豆瓣图片添加 Referer 头，防止防盗链拦截
+    const requestHeaders = {
+      'User-Agent': config.userAgent
+    };
+    if (targetUrl.includes('doubanio.com') || targetUrl.includes('douban.com')) {
+      requestHeaders['Referer'] = 'https://movie.douban.com/';
+    }
+
     const makeRequest = async () => {
       try {
         return await axios({
@@ -185,9 +193,7 @@ app.get('/proxy/:encodedUrl', async (req, res) => {
           url: targetUrl,
           responseType: 'stream',
           timeout: config.timeout,
-          headers: {
-            'User-Agent': config.userAgent
-          }
+          headers: requestHeaders
         });
       } catch (error) {
         if (retries < maxRetries) {

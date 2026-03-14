@@ -142,8 +142,10 @@ async function fetchContentWithType(targetUrl, requestHeaders) {
         'User-Agent': getRandomUserAgent(),
         'Accept': requestHeaders['accept'] || '*/*', // 传递原始 Accept 头（如果有）
         'Accept-Language': requestHeaders['accept-language'] || 'zh-CN,zh;q=0.9,en;q=0.8',
-        // 尝试设置一个合理的 Referer
-        'Referer': requestHeaders['referer'] || new URL(targetUrl).origin,
+        // 为豆瓣图片设置正确的 Referer，防止防盗链拦截
+        'Referer': (targetUrl.includes('doubanio.com') || targetUrl.includes('douban.com'))
+            ? 'https://movie.douban.com/'
+            : (requestHeaders['referer'] || new URL(targetUrl).origin),
     };
     // 清理空值的头
     Object.keys(headers).forEach(key => headers[key] === undefined || headers[key] === null || headers[key] === '' ? delete headers[key] : {});
