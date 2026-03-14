@@ -615,7 +615,7 @@ function showTagManageModal() {
             <div class="mb-4">
                 <div class="flex justify-between items-center mb-2">
                     <h4 class="text-lg font-medium text-gray-600">标签列表</h4>
-                    <button id="resetTagsBtn" class="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded">
+                    <button id="resetTagsBtn" class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded">
                         恢复默认标签
                     </button>
                 </div>

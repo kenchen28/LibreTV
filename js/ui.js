@@ -862,7 +862,7 @@ function clearLocalStorage() {
             <div class="bg-[#191919] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
                 <button id="closeBoxModal" class="absolute top-4 right-4 text-gray-500 hover:text-indigo-600 text-xl">&times;</button>
 
-                <h3 class="text-xl font-bold text-white mb-4">提示</h3>
+                <h3 class="text-xl font-bold text-gray-800 mb-4">提示</h3>
 
                 <div class="mb-4">
                     <div class="text-sm font-medium text-gray-600 mb-4">页面缓存和Cookie已清除，<span id="countdown">3</span> 秒后自动刷新本页面。</div>

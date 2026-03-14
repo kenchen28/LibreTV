@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/index.css">
 </head>
-<body class="page-bg text-white">
+<body class="page-bg text-gray-800">
     <!-- 将历史记录按钮移到左上角，并缩小尺寸 -->
     <div class="fixed top-4 left-4 z-10">
         <button onclick="toggleHistory(event)" class="bg-[#eae9e3] hover:bg-[#e5e4de] border border-[#e5e4de] hover:border-white rounded-lg px-3 py-1.5 transition-colors" aria-label="观看历史">
@@ -76,13 +76,13 @@
                 
                 <!-- 批量操作按钮 -->
                 <div class="flex space-x-2 mb-3">
-                    <button onclick="selectAllAPIs(true)" class="px-2 py-1 bg-[#e5e4de] hover:bg-[#444] text-white text-xs rounded">全选</button>
-                    <button onclick="selectAllAPIs(false)" class="px-2 py-1 bg-[#e5e4de] hover:bg-[#444] text-white text-xs rounded">全不选</button>
-                    <button onclick="selectAllAPIs(true, true)" class="px-2 py-1 bg-[#e5e4de] hover:bg-[#444] text-white text-xs rounded">全选普通资源</button>
+                    <button onclick="selectAllAPIs(true)" class="px-2 py-1 bg-[#e5e4de] hover:bg-[#d5d4ce] text-gray-700 text-xs rounded">全选</button>
+                    <button onclick="selectAllAPIs(false)" class="px-2 py-1 bg-[#e5e4de] hover:bg-[#d5d4ce] text-gray-700 text-xs rounded">全不选</button>
+                    <button onclick="selectAllAPIs(true, true)" class="px-2 py-1 bg-[#e5e4de] hover:bg-[#d5d4ce] text-gray-700 text-xs rounded">全选普通资源</button>
                 </div>
                 
                 <!-- API选择区域 - 使用滚动区域 -->
-                <div class="max-h-40 overflow-y-auto bg-[#191919] p-2 rounded-lg mb-3">
+                <div class="max-h-40 overflow-y-auto bg-[#f5f4ee] p-2 rounded-lg mb-3">
                     <div id="apiCheckboxes">
                         <!-- 这里将动态插入API复选框 -->
                     </div>
@@ -90,7 +90,7 @@
                 
                 <!-- API信息显示 -->
                 <div class="text-xs text-gray-500 flex justify-between items-center">
-                    <span>已选API数量：<span id="selectedApiCount" class="text-white">0</span></span>
+                    <span>已选API数量：<span id="selectedApiCount" class="text-indigo-600 font-semibold">0</span></span>
                     <span id="siteStatus" class="ml-2"></span>
                 </div>
             </div>
@@ -99,18 +99,18 @@
             <div class="p-3 bg-[#f5f4ee] rounded-lg shadow-inner">
                 <div class="flex justify-between items-center mb-2">
                     <label class="block text-sm font-medium text-gray-500 border-b border-[#e5e4de] w-full pb-1">自定义API</label>
-                    <button onclick="showAddCustomApiForm()" class="bg-[#e5e4de] hover:bg-[#444] text-white w-6 h-6 rounded-full text-center leading-none text-lg ml-1">+</button>
+                    <button onclick="showAddCustomApiForm()" class="bg-[#e5e4de] hover:bg-[#d5d4ce] text-gray-700 w-6 h-6 rounded-full text-center leading-none text-lg ml-1">+</button>
                 </div>
                 <div id="customApisList" class="max-h-32 overflow-y-auto mb-2">
                     <!-- 自定义API将显示在这里 -->
                 </div>
                 
                 <!-- 添加自定义API表单 (默认隐藏) -->
-                <div id="addCustomApiForm" class="hidden mt-2 p-2 bg-[#191919] rounded-lg">
-                    <input type="text" id="customApiName" placeholder="API名称" class="w-full bg-[#eae9e3] border border-[#e5e4de] text-white px-2 py-1 rounded mb-2" autocomplete="off">
-                    <input type="text" id="customApiUrl" placeholder="https://abc.com" class="w-full bg-[#eae9e3] border border-[#e5e4de] text-white px-2 py-1 rounded mb-2" autocomplete="off">
+                <div id="addCustomApiForm" class="hidden mt-2 p-2 bg-[#f5f4ee] rounded-lg">
+                    <input type="text" id="customApiName" placeholder="API名称" class="w-full bg-white border border-[#e5e4de] text-gray-800 px-2 py-1 rounded mb-2" autocomplete="off">
+                    <input type="text" id="customApiUrl" placeholder="https://abc.com" class="w-full bg-white border border-[#e5e4de] text-gray-800 px-2 py-1 rounded mb-2" autocomplete="off">
                     <!-- 新增 detail 地址输入框 -->
-                    <input type="text" id="customApiDetail" placeholder="detail地址（可选）" class="w-full bg-[#eae9e3] border border-[#e5e4de] text-white px-2 py-1 rounded mb-2" autocomplete="off">
+                    <input type="text" id="customApiDetail" placeholder="detail地址（可选）" class="w-full bg-white border border-[#e5e4de] text-gray-800 px-2 py-1 rounded mb-2" autocomplete="off">
                     <!-- 添加成人内容切换 -->
                     <div class="flex items-center mb-2">
                         <input type="checkbox" id="customApiIsAdult" class="form-checkbox h-4 w-4 text-indigo-500 bg-[#eae9e3] border border-[#e5e4de]">
@@ -118,7 +118,7 @@
                     </div>
                     <div class="flex space-x-2">
                         <button onclick="addCustomApi()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs">添加</button>
-                        <button onclick="cancelAddCustomApi()" class="bg-[#444] hover:bg-[#555] text-white px-3 py-1 rounded text-xs">取消</button>
+                        <button onclick="cancelAddCustomApi()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-xs">取消</button>
                     </div>
                 </div>
             </div>
@@ -339,7 +339,7 @@
                 <p class="text-gray-600 mb-4">请输入密码继续访问</p>
                 <form id="passwordForm" onsubmit="handlePasswordSubmit(); return false;">
                     <input type="text" name="username" id="username" autocomplete="username" style="display:none" tabindex="-1" aria-hidden="true">
-                    <input type="password" id="passwordInput" class="w-full bg-[#f5f4ee] border border-[#e5e4de] text-white px-4 py-3 rounded-lg focus:outline-none focus:border-white transition-colors" placeholder="密码..." autocomplete="new-password">
+                    <input type="password" id="passwordInput" class="w-full bg-[#f5f4ee] border border-[#e5e4de] text-gray-800 px-4 py-3 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors" placeholder="密码..." autocomplete="new-password">
                     <div class="mt-4 w-full flex space-x-4">
                         <button id="passwordSubmitBtn" type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">提交</button>
                         <button id="passwordCancelBtn" type="button" onclick="hidePasswordModal()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">取消</button>
@@ -384,8 +384,8 @@
     <!-- 添加 loading 提示框 -->
     <div id="loading" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
         <div class="bg-[#f5f4ee] p-8 rounded-lg border border-[#e5e4de] flex items-center space-x-4">
-            <div class="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-white text-lg">加载中...</p>
+            <div class="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-gray-700 text-lg">加载中...</p>
         </div>
     </div>
 

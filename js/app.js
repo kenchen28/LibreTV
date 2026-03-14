@@ -220,7 +220,7 @@ function renderCustomAPIsList() {
     customAPIs.forEach((api, index) => {
         const apiItem = document.createElement('div');
         apiItem.className = 'flex items-center justify-between p-1 mb-1 bg-[#eae9e3] rounded';
-        const textColorClass = api.isAdult ? 'text-indigo-400' : 'text-white';
+        const textColorClass = api.isAdult ? 'text-indigo-500' : 'text-gray-800';
         const adultTag = api.isAdult ? '<span class="text-xs text-indigo-400 mr-1">(18+)</span>' : '';
         // 新增 detail 地址显示
         const detailLine = api.detail ? `<div class="text-xs text-gray-500 truncate">detail: ${api.detail}</div>` : '';
@@ -266,7 +266,7 @@ function editCustomApi(index) {
         const buttonContainer = form.querySelector('div:last-child');
         buttonContainer.innerHTML = `
             <button onclick="updateCustomApi(${index})" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs">更新</button>
-            <button onclick="cancelEditCustomApi()" class="bg-[#444] hover:bg-[#555] text-white px-3 py-1 rounded text-xs">取消</button>
+            <button onclick="cancelEditCustomApi()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-xs">取消</button>
         `;
     }
 }
@@ -327,7 +327,7 @@ function restoreAddCustomApiButtons() {
     const buttonContainer = form.querySelector('div:last-child');
     buttonContainer.innerHTML = `
         <button onclick="addCustomApi()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs">添加</button>
-        <button onclick="cancelAddCustomApi()" class="bg-[#444] hover:bg-[#555] text-white px-3 py-1 rounded text-xs">取消</button>
+        <button onclick="cancelAddCustomApi()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-xs">取消</button>
     `;
 }
 
@@ -765,11 +765,11 @@ async function search() {
                                 
                                 <div class="flex flex-wrap ${hasCover ? '' : 'justify-center'} gap-1 mb-2">
                                     ${(item.type_name || '').toString().replace(/</g, '&lt;') ?
-                    `<span class="text-xs py-0.5 px-1.5 rounded bg-opacity-20 bg-blue-500 text-blue-300">
+                    `<span class="text-xs py-0.5 px-1.5 rounded bg-blue-100 text-blue-700">
                                           ${(item.type_name || '').toString().replace(/</g, '&lt;')}
                                       </span>` : ''}
                                     ${(item.vod_year || '') ?
-                    `<span class="text-xs py-0.5 px-1.5 rounded bg-opacity-20 bg-purple-500 text-purple-300">
+                    `<span class="text-xs py-0.5 px-1.5 rounded bg-purple-100 text-purple-700">
                                           ${item.vod_year}
                                       </span>` : ''}
                                 </div>
@@ -778,7 +778,7 @@ async function search() {
                                 </p>
                             </div>
                             
-                            <div class="flex justify-between items-center mt-1 pt-1 border-t border-gray-800">
+                            <div class="flex justify-between items-center mt-1 pt-1 border-t border-[#e5e4de]">
                                 ${sourceInfo ? `<div>${sourceInfo}</div>` : '<div></div>'}
                                 <!-- 接口名称过长会被挤变形
                                 <div>
@@ -952,7 +952,7 @@ async function showDetails(id, vod_name, sourceCode) {
                 <div class="flex flex-wrap items-center justify-between mb-4 gap-2">
                     <div class="flex items-center gap-2">
                         <button onclick="toggleEpisodeOrder('${sourceCode}', '${id}')" 
-                                class="px-3 py-1.5 bg-[#e5e4de] hover:bg-[#444] border border-[#d5d4ce] rounded text-sm transition-colors flex items-center gap-1">
+                                class="px-3 py-1.5 bg-[#e5e4de] hover:bg-[#d5d4ce] border border-[#d5d4ce] rounded text-sm transition-colors flex items-center gap-1">
                             <svg class="w-4 h-4 transform ${episodesReversed ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
                             </svg>
@@ -1157,12 +1157,12 @@ async function importConfigFromUrl() {
             
             <div class="mb-4">
                 <input type="text" id="configUrl" placeholder="输入配置文件URL" 
-                       class="w-full px-3 py-2 bg-[#eae9e3] border border-[#e5e4de] rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                       class="w-full px-3 py-2 bg-white border border-[#e5e4de] rounded-lg text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
             </div>
             
             <div class="flex justify-end space-x-2">
                 <button id="confirmUrlImport" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">导入</button>
-                <button id="cancelUrlImport" class="bg-[#444] hover:bg-[#555] text-white px-4 py-2 rounded">取消</button>
+                <button id="cancelUrlImport" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded">取消</button>
             </div>
         </div>`;
 
