@@ -1,4 +1,4 @@
-// 豆瓣热门电影电视剧推荐功能
+// 优点热门电影电视剧推荐功能
 
 // 豆瓣标签列表 - 修改为默认标签
 let defaultMovieTags = ['热门', '最新', '经典', '豆瓣高分', '冷门佳片', '华语', '欧美', '韩国', '日本', '动作', '喜剧', '日综', '爱情', '科幻', '悬疑', '恐怖', '治愈'];
@@ -391,7 +391,7 @@ function fetchDoubanTags() {
             }
         })
         .catch(error => {
-            console.error("获取豆瓣热门电影标签失败：", error);
+            console.error("获取优点热门电影标签失败：", error);
         });
     const tvTagsTarget = `https://movie.douban.com/j/search_tags?type=tv`
     fetchDoubanData(tvTagsTarget)
@@ -402,7 +402,7 @@ function fetchDoubanTags() {
             }
         })
        .catch(error => {
-            console.error("获取豆瓣热门电视剧标签失败：", error);
+            console.error("获取优点热门电视剧标签失败：", error);
         });
 }
 
@@ -607,7 +607,7 @@ function showTagManageModal() {
     
     // 模态框内容
     modal.innerHTML = `
-        <div class="bg-[#191919] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
+        <div class="bg-[#f5f4ee] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
             <button id="closeTagModal" class="absolute top-4 right-4 text-gray-500 hover:text-indigo-600 text-xl">&times;</button>
             
             <h3 class="text-xl font-bold text-gray-800 mb-4">标签管理 (${isMovie ? '电影' : '电视剧'})</h3>

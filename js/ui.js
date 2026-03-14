@@ -439,7 +439,7 @@ function loadViewingHistory() {
         return `
             <div class="history-item cursor-pointer relative group" onclick="playFromHistory('${item.url}', '${safeTitle}', ${item.episodeIndex || 0}, ${item.playbackPosition || 0})">
                 <button onclick="event.stopPropagation(); deleteHistoryItem('${safeURL}')"
-                        class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-red-400 p-1 rounded-full hover:bg-gray-800 z-10"
+                        class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-red-400 p-1 rounded-full hover:bg-gray-200 z-10"
                         title="删除记录">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -821,7 +821,7 @@ function clearLocalStorage() {
     modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40';
 
     modal.innerHTML = `
-        <div class="bg-[#191919] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
+        <div class="bg-[#f5f4ee] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
             <button id="closeBoxModal" class="absolute top-4 right-4 text-gray-500 hover:text-indigo-600 text-xl">&times;</button>
 
             <h3 class="text-xl font-bold text-red-500 mb-4">警告</h3>
@@ -859,7 +859,7 @@ function clearLocalStorage() {
         }
 
         modal.innerHTML = `
-            <div class="bg-[#191919] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
+            <div class="bg-[#f5f4ee] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
                 <button id="closeBoxModal" class="absolute top-4 right-4 text-gray-500 hover:text-indigo-600 text-xl">&times;</button>
 
                 <h3 class="text-xl font-bold text-gray-800 mb-4">提示</h3>
@@ -910,7 +910,7 @@ function showImportBox(fun) {
     modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40';
 
     modal.innerHTML = `
-        <div class="bg-[#191919] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
+        <div class="bg-[#f5f4ee] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
             <button id="closeBoxModal" class="absolute top-4 right-4 text-gray-500 hover:text-indigo-600 text-xl">&times;</button>
 
             <div class="m-4">

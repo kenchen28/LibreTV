@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-5SMC83MH');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="same-origin">
     <title>优点TV 播放器</title>
 
     <!-- Favicon -->
-    <link rel="icon" href="image/logo.png">
+    <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="image/logo-black.png">
     <link rel="manifest" href="manifest.json">
 
@@ -21,6 +24,9 @@
     <meta http-equiv="Expires" content="0">
 </head>
 <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5SMC83MH" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <header class="player-header-fixed p-4 flex items-center border-b border-[#e5e4de] gap-2">
         <div class="flex items-center min-w-0">
             <button id="homeButton" type="button" class="flex items-center min-w-0 cursor-pointer home-button">
@@ -81,21 +87,21 @@
         </div>
 
         <!-- 源信息 -->
-        <div class="player-container flex justify-between py-2 px-4 mb-2 bg-gray-700" id="resourceInfoBarContainer">
+        <div class="player-container flex justify-between py-2 px-4 mb-2 bg-[#eae9e3] border border-[#e5e4de] rounded-lg" id="resourceInfoBarContainer">
             <!-- 资源信息卡片、切换按钮、视频数将由JS动态渲染 -->
         </div>
 
         <!-- 集数导航 -->
         <div class="player-container">
             <div class="flex justify-between items-center my-4">
-                <button onclick="playPreviousEpisode()" id="prevButton" class="px-4 py-2 bg-[#eae9e3] hover:bg-[#e5e4de] border border-[#e5e4de] rounded-lg transition-colors">
+                <button onclick="playPreviousEpisode()" id="prevButton" style="background-color: #eae9e3; color: #1f2937; border: 1px solid #e5e4de;" class="px-4 py-2 rounded-lg transition-colors">
                     <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
                     上一集
                 </button>
                 <span class="text-gray-500" id="episodeInfo">加载中...</span>
-                <button onclick="playNextEpisode()" id="nextButton" class="px-4 py-2 bg-[#eae9e3] hover:bg-[#e5e4de] border border-[#e5e4de] rounded-lg transition-colors">
+                <button onclick="playNextEpisode()" id="nextButton" style="background-color: #eae9e3; color: #1f2937; border: 1px solid #e5e4de;" class="px-4 py-2 rounded-lg transition-colors">
                     下一集
                     <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -185,7 +191,7 @@
                         所有视频均来自第三方API接口。如有侵权，请联系相关内容提供方。
                     </p>
                     <div class="mt-2 flex justify-center md:justify-end space-x-4">
-                        <a href="/" class="text-gray-500 hover:text-indigo-600 text-sm transition-colors">首页</a>
+                        <a href="https://gitdocker.com/" class="text-gray-500 hover:text-indigo-600 text-sm transition-colors">首页</a>
                     </div>
                 </div>
             </div>

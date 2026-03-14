@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-5SMC83MH');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>优点TV - 免费在线视频搜索与观看平台</title>
@@ -9,7 +12,7 @@
     <meta name="author" content="优点TV Team">
 
     <!-- Favicon -->
-    <link rel="icon" href="image/logo.png">
+    <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="image/logo-black.png">
     <link rel="manifest" href="manifest.json">
     
@@ -18,6 +21,9 @@
     <link rel="stylesheet" href="css/index.css">
 </head>
 <body class="page-bg text-gray-800">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5SMC83MH" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <!-- 将历史记录按钮移到左上角，并缩小尺寸 -->
     <div class="fixed top-4 left-4 z-10">
         <button onclick="toggleHistory(event)" class="bg-[#eae9e3] hover:bg-[#e5e4de] border border-[#e5e4de] hover:border-white rounded-lg px-3 py-1.5 transition-colors" aria-label="观看历史">
@@ -128,7 +134,7 @@
                 <label class="block text-sm font-medium text-gray-500 mb-3 border-b border-[#e5e4de] pb-1">功能开关</label>
                 
                 <!-- 黄色内容过滤开关 -->
-                <div class="flex flex-col mb-3 pb-3 border-b border-[#222] relative">
+                <div class="flex flex-col mb-3 pb-3 border-b border-[#e5e4de] relative">
                     <div class="flex items-center justify-between">
                         <div>
                             <label class="text-sm font-medium text-gray-500">黄色内容过滤</label>
@@ -144,7 +150,7 @@
                 </div>
                 
                 <!-- 广告过滤开关 -->
-                <div class="flex items-center justify-between mb-3 pb-3 border-b border-[#222]">
+                <div class="flex items-center justify-between mb-3 pb-3 border-b border-[#e5e4de]">
                     <div>
                         <label class="text-sm font-medium text-gray-500">分片广告过滤</label>
                         <p class="text-xs text-gray-500 mt-1">关闭可减少旧版浏览器卡顿</p>
@@ -156,11 +162,11 @@
                     </div>
                 </div>
                 
-                <!-- 豆瓣热门开关 -->
+                <!-- 优点热门开关 -->
                 <div class="flex items-center justify-between">
                     <div>
-                        <label class="text-sm font-medium text-gray-500">豆瓣热门推荐</label>
-                        <p class="text-xs text-gray-500 mt-1">首页显示豆瓣热门影视内容</p>
+                        <label class="text-sm font-medium text-gray-500">优点热门推荐</label>
+                        <p class="text-xs text-gray-500 mt-1">首页显示优点热门影视内容</p>
                     </div>
                     <div class="relative inline-block w-12 align-middle select-none">
                         <input type="checkbox" id="doubanToggle" class="opacity-0 absolute w-full h-full cursor-pointer z-10">
@@ -190,6 +196,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                         </svg>
                         <h1 class="text-5xl font-bold gradient-text">优点TV</h1>
+                        <span class="mx-2 text-gray-300">|</span>
+                        <a href="https://gitdocker.com" target="_blank" rel="noopener" class="text-2xl font-bold text-gray-400 hover:text-indigo-500 transition-colors">优点Park</a>
                     </a>
                 </div>
                 <p class="text-gray-500 mb-8">自由观影，畅享精彩</p>
@@ -198,24 +206,24 @@
 
             <div id="searchArea" class="flex-1 flex flex-col items-center justify-center">
                 <div class="w-full max-w-2xl">
-                    <div class="flex items-stretch mb-3 h-14 shadow-lg rounded-lg overflow-hidden">
+                    <div class="flex items-stretch mb-3 h-14 shadow-md rounded-lg overflow-hidden border border-[#e5e4de]">
                         <!-- 首页按钮 -->
                         <button onclick="resetToHome()" 
-                                class="w-20 sm:w-24 flex items-center justify-center bg-white text-black font-medium hover:bg-gray-200 transition-colors" 
+                                class="w-20 sm:w-24 flex items-center justify-center bg-[#eae9e3] text-gray-700 font-medium hover:bg-[#e5e4de] transition-colors border-r border-[#e5e4de]" 
                                 aria-label="返回首页" title="返回首页">
                             首页
                         </button>
                         <!-- 搜索输入 -->
                         <input type="text" 
                                id="searchInput" 
-                               class="flex-1 bg-white border-y border-[#e5e4de] text-gray-800 px-6 py-0 focus:outline-none transition-colors min-w-0" 
+                               class="flex-1 bg-white text-gray-800 px-6 py-0 focus:outline-none transition-colors min-w-0" 
                                placeholder="搜索你喜欢的视频..." 
                                autocomplete="off"
                                aria-label="视频搜索框"
                                oninput="toggleClearButton()">
                         <!-- 清空按钮 -->
                         <button id="clearSearchInput" 
-                                class="flex pr-2 bg-[#f5f4ee] border-y border-[#e5e4de] items-center justify-center text-gray-500 hover:text-indigo-600 hidden"
+                                class="flex pr-2 bg-white items-center justify-center text-gray-400 hover:text-indigo-600 hidden"
                                 onclick="clearSearchInput()"
                                 aria-label="清空搜索框"
                                 title="清空搜索框">
@@ -225,7 +233,7 @@
                         </button>
                         <!-- 搜索按钮 -->
                         <button onclick="search()" 
-                                class="w-20 sm:w-24 flex items-center justify-center bg-white text-black font-medium hover:bg-gray-200 transition-colors" 
+                                class="w-20 sm:w-24 flex items-center justify-center bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors" 
                                 aria-label="搜索按钮">
                             搜索
                         </button>
@@ -238,7 +246,7 @@
                 </div>
             </div>
             
-            <!-- 豆瓣热门推荐区域: 默认隐藏，现在位于搜索区域下方，调整宽度 -->
+            <!-- 优点热门推荐区域: 默认隐藏，现在位于搜索区域下方，调整宽度 -->
             <div id="doubanArea" class="w-full my-8 hidden">
                 <div class="mx-auto max-w-screen-xl px-2">
                     <!-- 改进标题和标签区域布局 -->
@@ -246,7 +254,7 @@
                         <!-- 标题和刷新按钮一行 -->
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
-                                <h2 class="text-xl font-bold text-gray-800 mr-4">豆瓣热门</h2>
+                                <h2 class="text-xl font-bold text-gray-800 mr-4">优点热门</h2>
                                 <!-- 添加电影/电视剧切换开关 -->
                                 <div class="flex items-center bg-[#eae9e3] rounded-full p-1">
                                     <button id="douban-movie-toggle" class="px-3 py-1 text-sm rounded-full bg-indigo-600 text-white">电影</button>
@@ -308,7 +316,7 @@
                         所有视频均来自第三方API接口。如有侵权，请联系相关内容提供方。
                     </p>
                     <div class="mt-2 flex justify-center md:justify-end space-x-4">
-                        <a href="/" class="text-gray-500 hover:text-indigo-600 text-sm transition-colors">首页</a>
+                        <a href="https://gitdocker.com/" class="text-gray-500 hover:text-indigo-600 text-sm transition-colors">首页</a>
                     </div>
                 </div>
             </div>

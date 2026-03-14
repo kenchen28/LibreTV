@@ -833,23 +833,35 @@ function updateButtonStates() {
 
     // 处理上一集按钮
     if (currentEpisodeIndex > 0) {
-        prevButton.classList.remove('bg-gray-700', 'cursor-not-allowed');
-        prevButton.classList.add('bg-[#eae9e3]', 'hover:bg-[#e5e4de]');
+        prevButton.style.backgroundColor = '#eae9e3';
+        prevButton.style.color = '#1f2937';
+        prevButton.style.border = '1px solid #e5e4de';
+        prevButton.style.cursor = 'pointer';
+        prevButton.style.opacity = '1';
         prevButton.removeAttribute('disabled');
     } else {
-        prevButton.classList.add('bg-gray-700', 'cursor-not-allowed');
-        prevButton.classList.remove('bg-[#eae9e3]', 'hover:bg-[#e5e4de]');
+        prevButton.style.backgroundColor = '#e5e4de';
+        prevButton.style.color = '#9ca3af';
+        prevButton.style.border = '1px solid #e5e4de';
+        prevButton.style.cursor = 'not-allowed';
+        prevButton.style.opacity = '0.6';
         prevButton.setAttribute('disabled', '');
     }
 
     // 处理下一集按钮
     if (currentEpisodeIndex < currentEpisodes.length - 1) {
-        nextButton.classList.remove('bg-gray-700', 'cursor-not-allowed');
-        nextButton.classList.add('bg-[#eae9e3]', 'hover:bg-[#e5e4de]');
+        nextButton.style.backgroundColor = '#eae9e3';
+        nextButton.style.color = '#1f2937';
+        nextButton.style.border = '1px solid #e5e4de';
+        nextButton.style.cursor = 'pointer';
+        nextButton.style.opacity = '1';
         nextButton.removeAttribute('disabled');
     } else {
-        nextButton.classList.add('bg-gray-700', 'cursor-not-allowed');
-        nextButton.classList.remove('bg-[#eae9e3]', 'hover:bg-[#e5e4de]');
+        nextButton.style.backgroundColor = '#e5e4de';
+        nextButton.style.color = '#9ca3af';
+        nextButton.style.border = '1px solid #e5e4de';
+        nextButton.style.cursor = 'not-allowed';
+        nextButton.style.opacity = '0.6';
         nextButton.setAttribute('disabled', '');
     }
 }
@@ -875,7 +887,8 @@ function renderEpisodes() {
         html += `
             <button id="episode-${realIndex}" 
                     onclick="playEpisode(${realIndex})" 
-                    class="px-4 py-2 ${isActive ? 'episode-active' : '!bg-[#eae9e3] hover:!bg-[#e5e4de] hover:!shadow-none'} !border ${isActive ? '!border-blue-500' : '!border-[#e5e4de]'} rounded-lg transition-colors text-center episode-btn">
+                    style="${isActive ? 'background-color:#4f46e5;color:white;border:1px solid #6366f1;' : 'background-color:#eae9e3;color:#1f2937;border:1px solid #e5e4de;'}"
+                    class="px-4 py-2 rounded-lg transition-colors text-center episode-btn ${isActive ? 'episode-active' : ''}">
                 ${realIndex + 1}
             </button>
         `;
@@ -1678,7 +1691,7 @@ async function showSwitchResourceModal() {
         html += `
             <div class="relative group ${isCurrentSource ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105 transition-transform'}" 
                  ${!isCurrentSource ? `onclick="switchToResource('${sourceKey}', '${result.vod_id}')"` : ''}>
-                <div class="aspect-[2/3] rounded-lg overflow-hidden bg-gray-800 relative">
+                <div class="aspect-[2/3] rounded-lg overflow-hidden bg-[#eae9e3] relative">
                     <img src="${result.vod_pic}" 
                          alt="${result.vod_name}"
                          class="w-full h-full object-cover"

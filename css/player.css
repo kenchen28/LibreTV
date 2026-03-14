@@ -202,8 +202,9 @@ div.player-loading-text {
 }
 
 .episode-active {
-    background-color: #3b82f6 !important;
-    border-color: #60a5fa !important;
+    background-color: #4f46e5 !important;
+    border-color: #6366f1 !important;
+    color: white !important;
 }
 
 .episode-grid {
@@ -256,7 +257,7 @@ div.player-loading-text {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #333;
+    background-color: #d5d4ce;
     transition: .4s;
     border-radius: 24px;
 }
@@ -323,7 +324,7 @@ input:checked + .slider:before {
 #resourceInfoBarContainer {
     align-items: center;
     border-radius: 0.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .resource-info-bar-left {
