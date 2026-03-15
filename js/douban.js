@@ -573,6 +573,12 @@ async function renderDoubanCards(data, container, append = false) {
             fragment.appendChild(emptyEl);
         }
     } else {
+        // Shuffle cards randomly on each render
+        for (let i = data.subjects.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [data.subjects[i], data.subjects[j]] = [data.subjects[j], data.subjects[i]];
+        }
+
         const authProxyUrls = await Promise.all(
             data.subjects.map(async (item) => {
                 const proxiedUrl = PROXY_URL + encodeURIComponent(item.cover);

@@ -24,8 +24,59 @@
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5SMC83MH" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
+
+    <!-- Navigation Header -->
+    <header class="bg-white border-b border-gray-200 shadow-sm relative z-20">
+        <div class="max-w-7xl mx-auto px-5">
+            <div class="flex items-center justify-between py-3">
+                <a href="#" onclick="resetToHome(); return false;" class="text-xl font-bold text-gray-800 hover:text-indigo-700 transition-colors tracking-wide">优点TV</a>
+
+                <!-- Hamburger button - mobile only -->
+                <button onclick="document.getElementById('mobileNav').classList.toggle('hidden')" class="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100" aria-label="Toggle menu">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+
+                <!-- Desktop nav -->
+                <nav class="hidden md:flex gap-4 items-center">
+                    <a href="https://gitdocker.com/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">优点Park</a>
+                    <a href="https://cp.gitdocker.com/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">优点成人</a>
+                    <div class="border-l border-gray-300 h-6 mx-1"></div>
+                    <button onclick="document.getElementById('helpModal').classList.remove('hidden')" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">使用说明</button>
+                    <div class="border-l border-gray-300 h-6 mx-1"></div>
+                    <button onclick="toggleHistory(event)" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">观看历史</button>
+                    <button onclick="toggleSettings(event)" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">设置</button>
+                    <div class="border-l border-gray-300 h-6 mx-1"></div>
+                    <button onclick="changeLanguage('en')" id="lang-en" class="px-3 py-1.5 rounded-md font-medium transition-all text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">EN</button>
+                    <button onclick="changeLanguage('zh-CN')" id="lang-zh-CN" class="px-3 py-1.5 rounded-md font-medium transition-all text-sm bg-indigo-600 text-white">简体</button>
+                    <button onclick="changeLanguage('zh-TW')" id="lang-zh-TW" class="px-3 py-1.5 rounded-md font-medium transition-all text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">繁體</button>
+                </nav>
+            </div>
+
+            <!-- Mobile nav panel -->
+            <div id="mobileNav" class="md:hidden hidden pb-4">
+                <div class="flex flex-col gap-3 pt-2 border-t border-gray-200">
+                    <a href="https://gitdocker.com/" target="_blank" rel="noopener noreferrer" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">优点Park</a>
+                    <a href="https://cp.gitdocker.com/" target="_blank" rel="noopener noreferrer" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">优点成人</a>
+                    <button onclick="document.getElementById('helpModal').classList.remove('hidden')" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">使用说明</button>
+                    <button onclick="toggleHistory(event)" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">观看历史</button>
+                    <button onclick="toggleSettings(event)" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">设置</button>
+                    <div class="flex gap-2 px-4 pt-1 justify-center">
+                        <button onclick="changeLanguage('en')" class="lang-mobile-btn px-3 py-1.5 rounded-md font-medium transition-all text-sm text-gray-500 hover:bg-gray-100" data-lang="en">EN</button>
+                        <button onclick="changeLanguage('zh-CN')" class="lang-mobile-btn px-3 py-1.5 rounded-md font-medium transition-all text-sm bg-indigo-600 text-white" data-lang="zh-CN">简体</button>
+                        <button onclick="changeLanguage('zh-TW')" class="lang-mobile-btn px-3 py-1.5 rounded-md font-medium transition-all text-sm text-gray-500 hover:bg-gray-100" data-lang="zh-TW">繁體</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Google Translate element - always in DOM, hidden -->
+            <div id="google_translate_element_hidden" class="hidden"></div>
+        </div>
+    </header>
+
     <!-- 将历史记录按钮移到左上角，并缩小尺寸 -->
-    <div class="fixed top-4 left-4 z-10">
+    <div class="fixed top-16 left-4 z-10 md:hidden">
         <button onclick="toggleHistory(event)" class="bg-[#eae9e3] hover:bg-[#e5e4de] border border-[#e5e4de] hover:border-white rounded-lg px-3 py-1.5 transition-colors" aria-label="观看历史">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -34,7 +85,7 @@
     </div>
 
     <!-- 设置按钮保留在右上角，并缩小尺寸 -->
-    <div class="fixed top-4 right-4 z-10">
+    <div class="fixed top-16 right-4 z-10 md:hidden">
         <button onclick="toggleSettings(event)" class="bg-[#eae9e3] hover:bg-[#e5e4de] border border-[#e5e4de] hover:border-white rounded-lg px-3 py-1.5 transition-colors" aria-label="打开设置">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -492,6 +543,102 @@
             </div>
         </div>
     </div>
+
+    <!-- Google Translate -->
+    <script>
+    (function() {
+        var currentLanguage = (function() {
+            var lang = navigator.language || 'zh-CN';
+            if (lang.startsWith('zh-TW') || lang === 'zh-Hant') return 'zh-TW';
+            return 'zh-CN';
+        })();
+
+        // Update button styles on load
+        updateLangButtons(currentLanguage);
+
+        window.googleTranslateElementInit = function() {
+            if (window.google && window.google.translate) {
+                new window.google.translate.TranslateElement({
+                    pageLanguage: 'en',
+                    includedLanguages: 'zh-CN,zh-TW,en',
+                    autoDisplay: false
+                }, 'google_translate_element_hidden');
+            }
+        };
+
+        // Auto-apply browser language
+        if (currentLanguage !== 'en') {
+            var autoInterval = setInterval(function() {
+                var select = document.querySelector('.goog-te-combo');
+                if (select) {
+                    select.value = currentLanguage;
+                    select.dispatchEvent(new Event('change'));
+                    clearInterval(autoInterval);
+                }
+            }, 500);
+            setTimeout(function() { clearInterval(autoInterval); }, 10000);
+        }
+
+        // Load Google Translate script
+        var script = document.createElement('script');
+        script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+        script.async = true;
+        document.body.appendChild(script);
+
+        window.changeLanguage = function(langCode) {
+            currentLanguage = langCode;
+            updateLangButtons(langCode);
+
+            var interval = setInterval(function() {
+                var select = document.querySelector('.goog-te-combo');
+                if (select) {
+                    select.value = langCode;
+                    select.dispatchEvent(new Event('change'));
+                    clearInterval(interval);
+
+                    if (langCode === 'zh-CN' || langCode === 'zh-TW') {
+                        setTimeout(function() {
+                            var checkFrame = setInterval(function() {
+                                var frame = document.querySelector('.goog-te-banner-frame');
+                                if (frame && window.getComputedStyle(frame).display !== 'none') {
+                                    document.body.style.paddingTop = '40px';
+                                    clearInterval(checkFrame);
+                                }
+                            }, 100);
+                            setTimeout(function() { clearInterval(checkFrame); }, 3000);
+                        }, 500);
+                    } else {
+                        document.body.style.paddingTop = '0';
+                    }
+                }
+            }, 100);
+            setTimeout(function() { clearInterval(interval); }, 5000);
+        };
+
+        function updateLangButtons(lang) {
+            var langs = ['en', 'zh-CN', 'zh-TW'];
+            langs.forEach(function(l) {
+                var btn = document.getElementById('lang-' + l);
+                if (btn) {
+                    if (l === lang) {
+                        btn.className = 'px-3 py-1.5 rounded-md font-medium transition-all text-sm bg-indigo-600 text-white';
+                    } else {
+                        btn.className = 'px-3 py-1.5 rounded-md font-medium transition-all text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900';
+                    }
+                }
+                // Mobile buttons
+                var mobileBtns = document.querySelectorAll('.lang-mobile-btn[data-lang="' + l + '"]');
+                mobileBtns.forEach(function(mb) {
+                    if (l === lang) {
+                        mb.className = 'lang-mobile-btn px-3 py-1.5 rounded-md font-medium transition-all text-sm bg-indigo-600 text-white';
+                    } else {
+                        mb.className = 'lang-mobile-btn px-3 py-1.5 rounded-md font-medium transition-all text-sm text-gray-500 hover:bg-gray-100';
+                    }
+                });
+            });
+        }
+    })();
+    </script>
 
     <!-- 添加弹窗和URL搜索参数处理脚本 -->
     <script src="js/index-page.js"></script>
