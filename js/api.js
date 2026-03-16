@@ -397,8 +397,19 @@ async function handleAggregatedSearch(searchQuery) {
                 throw new Error(`${source}源返回的数据格式无效`);
             }
             
+            // 过滤结果：只保留名称中包含搜索关键词的项目，防止API返回全部内容
+            const queryKeywords = searchQuery.toLowerCase()
+                .split(/[\s:：,，、;；!！?？·\-—]+/)
+                .filter(k => k.length >= 2);
+            const matchTerms = queryKeywords.length > 0 ? queryKeywords : [searchQuery.toLowerCase()];
+            
+            const filteredList = data.list.filter(item => {
+                const vodName = (item.vod_name || '').toLowerCase();
+                return matchTerms.some(term => vodName.includes(term));
+            });
+            
             // 为搜索结果添加源信息
-            const results = data.list.map(item => ({
+            const results = filteredList.map(item => ({
                 ...item,
                 source_name: API_SITES[source].name,
                 source_code: source
