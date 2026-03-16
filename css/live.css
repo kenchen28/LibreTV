@@ -1,0 +1,283 @@
+/* Live TV Page Styles */
+.live-container {
+    display: flex;
+    height: calc(100vh - 57px);
+    overflow: hidden;
+}
+
+.channel-sidebar {
+    width: 320px;
+    min-width: 280px;
+    background: #f5f4ee;
+    border-right: 1px solid #e5e4de;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.channel-sidebar .sidebar-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e4de;
+    background: #f0efe9;
+}
+
+.channel-sidebar .sidebar-header input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e5e4de;
+    border-radius: 8px;
+    background: white;
+    font-size: 14px;
+    outline: none;
+}
+
+.channel-sidebar .sidebar-header input:focus {
+    border-color: #6366f1;
+}
+
+.category-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #e5e4de;
+    background: #f0efe9;
+    overflow-x: auto;
+}
+
+.category-tab {
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    background: #eae9e3;
+    color: #6b7280;
+    border: 1px solid #e5e4de;
+    transition: all 0.2s;
+}
+
+.category-tab:hover {
+    background: #e5e4de;
+}
+
+.category-tab.active {
+    background: #6366f1;
+    color: white;
+    border-color: #6366f1;
+}
+
+.channel-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.channel-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+}
+
+.channel-item:hover {
+    background: #eae9e3;
+}
+
+.channel-item.active {
+    background: #6366f1;
+    color: white;
+}
+
+.channel-item .channel-name {
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+}
+
+.channel-item .channel-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    background: #e5e4de;
+    color: #6b7280;
+}
+
+.channel-item.active .channel-badge {
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
+
+.live-player-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+    min-width: 0;
+}
+
+.live-player-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.live-player-wrapper video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.live-player-info {
+    padding: 12px 20px;
+    background: #1a1a1a;
+    color: #ccc;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.live-player-info .now-playing {
+    font-weight: 600;
+    color: white;
+    font-size: 16px;
+}
+
+.live-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    gap: 12px;
+}
+
+.live-empty-state svg {
+    width: 64px;
+    height: 64px;
+    opacity: 0.4;
+}
+
+/* Source selector */
+.source-selector {
+    padding: 10px 16px;
+    border-bottom: 1px solid #e5e4de;
+    background: #f0efe9;
+}
+
+.source-selector select {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #e5e4de;
+    border-radius: 8px;
+    background: white;
+    font-size: 13px;
+    outline: none;
+}
+
+.source-selector select:focus {
+    border-color: #6366f1;
+}
+
+/* Custom M3U input */
+.custom-m3u-input {
+    display: flex;
+    gap: 6px;
+    padding: 8px 16px;
+    border-bottom: 1px solid #e5e4de;
+    background: #f0efe9;
+}
+
+.custom-m3u-input input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #e5e4de;
+    border-radius: 8px;
+    background: white;
+    font-size: 13px;
+    outline: none;
+}
+
+.custom-m3u-input button {
+    padding: 6px 14px;
+    background: #6366f1;
+    color: white;
+    border-radius: 8px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.custom-m3u-input button:hover {
+    background: #4f46e5;
+}
+
+/* Loading spinner for channel list */
+.channel-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #999;
+    gap: 8px;
+}
+
+.channel-loading .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e5e4de;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .live-container {
+        flex-direction: column;
+    }
+    
+    .channel-sidebar {
+        width: 100%;
+        min-width: unset;
+        max-height: 45vh;
+        border-right: none;
+        border-bottom: 1px solid #e5e4de;
+    }
+    
+    .live-player-area {
+        min-height: 30vh;
+    }
+    
+    .channel-sidebar.collapsed {
+        max-height: 48px;
+        overflow: hidden;
+    }
+    
+    .mobile-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        background: #f0efe9;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #6366f1;
+    }
+}
+
+@media (min-width: 769px) {
+    .mobile-toggle {
+        display: none;
+    }
+}

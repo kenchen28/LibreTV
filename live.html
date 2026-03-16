@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优点TV - 电视直播</title>
+    <meta name="description" content="优点TV电视直播，免费观看央视、卫视、国际频道直播">
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="image/logo-black.png">
+    <script src="libs/tailwindcss.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/live.css">
+</head>
+<body class="page-bg text-gray-800 overflow-hidden">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 shadow-sm relative z-20">
+        <div class="max-w-full mx-auto px-5">
+            <div class="flex items-center justify-between py-3">
+                <div class="flex items-center gap-4">
+                    <a href="/" class="text-xl font-bold text-gray-800 hover:text-indigo-700 transition-colors tracking-wide">优点TV</a>
+                    <span class="text-gray-300">|</span>
+                    <span class="text-sm font-medium text-indigo-600">电视直播</span>
+                </div>
+                <nav class="flex gap-3 items-center">
+                    <a href="/" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">影视搜索</a>
+                    <a href="/live.html" class="px-3 py-1.5 rounded-md font-medium text-sm bg-indigo-600 text-white">电视直播</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="live-container">
+        <!-- Channel Sidebar -->
+        <div class="channel-sidebar">
+            <div class="mobile-toggle" id="mobileToggle" onclick="toggleSidebar()">▲ 收起频道列表</div>
+
+            <!-- Source Selector -->
+            <div class="source-selector">
+                <select id="sourceSelect" aria-label="选择频道源"></select>
+            </div>
+
+            <!-- Custom M3U Input -->
+            <div id="customM3uSection" class="custom-m3u-input hidden">
+                <input type="text" id="customM3uUrl" placeholder="输入M3U播放列表URL..." aria-label="自定义M3U地址">
+                <button onclick="loadCustomM3U()">加载</button>
+            </div>
+
+            <!-- Search -->
+            <div class="sidebar-header">
+                <input type="text" id="channelSearch" placeholder="搜索频道..." aria-label="搜索频道">
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="category-tabs" id="categoryTabs">
+                <!-- Dynamic -->
+            </div>
+
+            <!-- Channel List -->
+            <div class="channel-list" id="channelList">
+                <div class="channel-loading"><div class="spinner"></div>加载中...</div>
+            </div>
+        </div>
+
+        <!-- Player Area -->
+        <div class="live-player-area">
+            <div class="live-player-wrapper" id="playerWrapper">
+                <video id="liveVideo" style="display:none" controls autoplay playsinline></video>
+                <div class="live-empty-state" id="emptyState">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                    <p>选择一个频道开始观看</p>
+                </div>
+            </div>
+            <div class="live-player-info">
+                <div>
+                    <span class="now-playing" id="nowPlaying">未选择频道</span>
+                    <span id="channelGroup" class="ml-3 text-sm text-gray-400"></span>
+                </div>
+                <span class="text-xs text-gray-500">LIVE</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="libs/hls.min.js"></script>
+    <script src="js/live.js"></script>
+</body>
+</html>
