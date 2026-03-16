@@ -84,6 +84,17 @@
     </div>
 
     <script src="libs/hls.min.js"></script>
+    <script src="libs/sha256.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/proxy-auth.js"></script>
+    <script src="js/password.js"></script>
     <script src="js/live.js"></script>
+
+    <!-- 环境变量注入脚本 -->
+    <script>
+        window.__ENV__ = window.__ENV__ || {};
+        window.__ENV__.PASSWORD = "{{PASSWORD}}";
+        window.__ENV__.ADMINPASSWORD = "{{ADMINPASSWORD}}";
+    </script>
 </body>
 </html>

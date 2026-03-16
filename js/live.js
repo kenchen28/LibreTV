@@ -53,6 +53,42 @@ let currentChannel = null;
 let hlsInstance = null;
 let currentSourceIndex = 0;
 
+// Fetch with timeout (compatible with older browsers)
+function fetchWithTimeout(url, timeoutMs = 15000) {
+    return new Promise((resolve, reject) => {
+        const controller = new AbortController();
+        const timer = setTimeout(() => {
+            controller.abort();
+            reject(new Error('Request timeout'));
+        }, timeoutMs);
+
+        fetch(url, { signal: controller.signal })
+            .then(res => { clearTimeout(timer); resolve(res); })
+            .catch(err => { clearTimeout(timer); reject(err); });
+    });
+}
+
+// Fetch M3U content — try direct first, fall back to proxy
+async function fetchM3U(url) {
+    // Try direct fetch first (GitHub/iptv-org have CORS headers)
+    try {
+        const res = await fetchWithTimeout(url, 10000);
+        if (res.ok) return await res.text();
+    } catch (e) {
+        console.warn('Direct fetch failed, trying proxy:', e.message);
+    }
+
+    // Fall back to proxy
+    const proxyUrl = '/proxy/' + encodeURIComponent(url);
+    // Add auth if available
+    const finalUrl = window.ProxyAuth?.addAuthToProxyUrl
+        ? await window.ProxyAuth.addAuthToProxyUrl(proxyUrl)
+        : proxyUrl;
+    const res = await fetchWithTimeout(finalUrl, 15000);
+    if (!res.ok) throw new Error('Proxy fetch failed: ' + res.status);
+    return await res.text();
+}
+
 // Parse M3U content into channel objects
 function parseM3U(content) {
     const lines = content.split('\n');
@@ -62,7 +98,6 @@ function parseM3U(content) {
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
         if (line.startsWith('#EXTINF:')) {
-            // Extract channel info
             const nameMatch = line.match(/,(.+)$/);
             const groupMatch = line.match(/group-title="([^"]*)"/);
             const logoMatch = line.match(/tvg-logo="([^"]*)"/);
@@ -90,9 +125,7 @@ async function loadSource(sourceIndex) {
     channelList.innerHTML = '<div class="channel-loading"><div class="spinner"></div>加载中...</div>';
 
     try {
-        const response = await fetch(source.url, { signal: AbortSignal.timeout(15000) });
-        if (!response.ok) throw new Error('Failed to fetch');
-        const text = await response.text();
+        const text = await fetchM3U(source.url);
         allChannels = parseM3U(text);
 
         if (allChannels.length === 0) {
@@ -104,7 +137,7 @@ async function loadSource(sourceIndex) {
         filterChannels('全部');
     } catch (err) {
         console.error('Load source error:', err);
-        channelList.innerHTML = '<div class="channel-loading">加载失败，请尝试其他源</div>';
+        channelList.innerHTML = '<div class="channel-loading">加载失败，请尝试其他源<br><small style="color:#999">' + err.message + '</small></div>';
     }
 }
 
@@ -114,16 +147,13 @@ async function loadCustomM3U() {
     const url = input.value.trim();
     if (!url) return;
 
-    // Save to localStorage
     localStorage.setItem('customM3uUrl', url);
 
     const channelList = document.getElementById('channelList');
     channelList.innerHTML = '<div class="channel-loading"><div class="spinner"></div>加载中...</div>';
 
     try {
-        const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
-        if (!response.ok) throw new Error('Failed to fetch');
-        const text = await response.text();
+        const text = await fetchM3U(url);
         allChannels = parseM3U(text);
 
         if (allChannels.length === 0) {
@@ -131,13 +161,12 @@ async function loadCustomM3U() {
             return;
         }
 
-        // Set source selector to custom
         document.getElementById('sourceSelect').value = 'custom';
         renderCategories();
         filterChannels('全部');
     } catch (err) {
         console.error('Custom M3U error:', err);
-        channelList.innerHTML = '<div class="channel-loading">加载失败，请检查URL</div>';
+        channelList.innerHTML = '<div class="channel-loading">加载失败，请检查URL<br><small style="color:#999">' + err.message + '</small></div>';
     }
 }
 
@@ -159,7 +188,6 @@ function renderCategories() {
 
 // Filter channels by category and search
 function filterChannels(category) {
-    // Update active tab
     document.querySelectorAll('.category-tab').forEach(tab => {
         tab.classList.toggle('active', tab.textContent === category);
     });
@@ -197,19 +225,17 @@ function playChannel(index) {
     if (!channel) return;
     currentChannel = channel;
 
-    // Update UI
     renderChannelList();
     document.getElementById('nowPlaying').textContent = channel.name;
     document.getElementById('channelGroup').textContent = channel.group;
 
     // On mobile, collapse sidebar
-    const sidebar = document.querySelector('.channel-sidebar');
     if (window.innerWidth <= 768) {
+        const sidebar = document.querySelector('.channel-sidebar');
         sidebar.classList.add('collapsed');
         updateMobileToggle();
     }
 
-    // Play the stream
     playStream(channel.url);
 }
 
@@ -217,19 +243,17 @@ function playChannel(index) {
 function playStream(url) {
     const video = document.getElementById('liveVideo');
     const emptyState = document.getElementById('emptyState');
-    const playerWrapper = document.getElementById('playerWrapper');
 
     emptyState.style.display = 'none';
     video.style.display = 'block';
 
-    // Destroy previous HLS instance
     if (hlsInstance) {
         hlsInstance.destroy();
         hlsInstance = null;
     }
 
     if (url.includes('.m3u8') || url.includes('m3u8')) {
-        if (Hls.isSupported()) {
+        if (typeof Hls !== 'undefined' && Hls.isSupported()) {
             hlsInstance = new Hls({
                 maxBufferLength: 30,
                 maxMaxBufferLength: 60,
@@ -250,12 +274,12 @@ function playStream(url) {
                 }
             });
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            // Safari native HLS
             video.src = url;
             video.play().catch(() => {});
+        } else {
+            showPlayerError();
         }
     } else {
-        // Direct stream (mp4, etc.)
         video.src = url;
         video.play().catch(() => {});
     }
@@ -264,21 +288,20 @@ function playStream(url) {
 function showPlayerError() {
     const video = document.getElementById('liveVideo');
     video.style.display = 'none';
-    document.getElementById('emptyState').style.display = 'flex';
-    document.getElementById('emptyState').innerHTML = `
+    const emptyState = document.getElementById('emptyState');
+    emptyState.style.display = 'flex';
+    emptyState.innerHTML = `
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <p>频道加载失败，请尝试其他频道</p>
     `;
 }
 
-// Search handler
 function onChannelSearch() {
     const activeTab = document.querySelector('.category-tab.active');
     const category = activeTab ? activeTab.textContent : '全部';
     filterChannels(category);
 }
 
-// Mobile toggle
 function toggleSidebar() {
     const sidebar = document.querySelector('.channel-sidebar');
     sidebar.classList.toggle('collapsed');
@@ -295,7 +318,6 @@ function updateMobileToggle() {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    // Populate source selector
     const select = document.getElementById('sourceSelect');
     LIVE_TV_SOURCES.forEach((src, idx) => {
         const opt = document.createElement('option');
@@ -304,7 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
         select.appendChild(opt);
     });
 
-    // Add custom option
     const customOpt = document.createElement('option');
     customOpt.value = 'custom';
     customOpt.textContent = '自定义M3U';
@@ -320,13 +341,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Restore custom M3U URL
     const savedUrl = localStorage.getItem('customM3uUrl');
     if (savedUrl) {
         document.getElementById('customM3uUrl').value = savedUrl;
     }
 
-    // Search input
     document.getElementById('channelSearch').addEventListener('input', onChannelSearch);
 
     // Load default source
