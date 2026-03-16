@@ -1,8 +1,18 @@
 // Live TV Module
 const LIVE_TV_SOURCES = [
     {
-        name: '央视+卫视 (IPV4)',
-        url: 'https://raw.githubusercontent.com/BurningC4/Chinese-IPTV/master/TV-IPV4.m3u',
+        name: '央视+卫视+地方台',
+        url: 'https://m3u.ibert.me/cn.m3u',
+        region: 'cn'
+    },
+    {
+        name: '央视+卫视 (IPV6)',
+        url: 'https://m3u.ibert.me/fmml_ipv6.m3u',
+        region: 'cn'
+    },
+    {
+        name: '央视+卫视 (多线路)',
+        url: 'https://m3u.ibert.me/fmml_itv.m3u',
         region: 'cn'
     },
     {
@@ -11,7 +21,7 @@ const LIVE_TV_SOURCES = [
         region: 'intl'
     },
     {
-        name: '中国频道',
+        name: '中国频道 (iptv-org)',
         url: 'https://iptv-org.github.io/iptv/countries/cn.m3u',
         region: 'cn'
     },
