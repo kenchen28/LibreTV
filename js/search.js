@@ -45,8 +45,26 @@ async function searchByAPIAndKeyWord(apiId, query) {
             return [];
         }
         
+        // 过滤结果：只保留名称中包含搜索关键词的项目，防止API返回全部内容
+        // 将查询拆分为关键词（按空格、冒号、标点分割），过滤掉太短的词
+        const queryKeywords = query.toLowerCase()
+            .split(/[\s:：,，、;；!！?？·\-—]+/)
+            .filter(k => k.length >= 2);
+        // 如果无法拆分出有效关键词，用完整查询作为匹配
+        const matchTerms = queryKeywords.length > 0 ? queryKeywords : [query.toLowerCase()];
+        
+        const filteredList = data.list.filter(item => {
+            const vodName = (item.vod_name || '').toLowerCase();
+            // 任意一个关键词匹配即可
+            return matchTerms.some(term => vodName.includes(term));
+        });
+        
+        if (filteredList.length === 0) {
+            return [];
+        }
+        
         // 处理第一页结果
-        const results = data.list.map(item => ({
+        const results = filteredList.map(item => ({
             ...item,
             source_name: apiName,
             source_code: apiId,
@@ -55,8 +73,14 @@ async function searchByAPIAndKeyWord(apiId, query) {
         
         // 获取总页数
         const pageCount = data.pagecount || 1;
+        
+        // 如果第一页的匹配率很低（<10%），说明API可能返回了全部内容而非搜索结果
+        // 此时不再获取更多页，避免拉取数千条无关结果
+        const matchRate = filteredList.length / data.list.length;
+        const shouldFetchMore = matchRate > 0.1 || data.list.length <= 20;
+        
         // 确定需要获取的额外页数 (最多获取maxPages页)
-        const pagesToFetch = Math.min(pageCount - 1, API_CONFIG.search.maxPages - 1);
+        const pagesToFetch = shouldFetchMore ? Math.min(pageCount - 1, API_CONFIG.search.maxPages - 1) : 0;
         
         // 如果有额外页数，获取更多页的结果
         if (pagesToFetch > 0) {
@@ -92,8 +116,16 @@ async function searchByAPIAndKeyWord(apiId, query) {
                         
                         if (!pageData || !pageData.list || !Array.isArray(pageData.list)) return [];
                         
+                        // 过滤结果：只保留名称中包含搜索关键词的项目
+                        const filteredPageList = pageData.list.filter(item => {
+                            const vodName = (item.vod_name || '').toLowerCase();
+                            return matchTerms.some(term => vodName.includes(term));
+                        });
+                        
+                        if (filteredPageList.length === 0) return [];
+                        
                         // 处理当前页结果
-                        return pageData.list.map(item => ({
+                        return filteredPageList.map(item => ({
                             ...item,
                             source_name: apiName,
                             source_code: apiId,
