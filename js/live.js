@@ -101,8 +101,9 @@ async function fetchM3U(url) {
 
 // Convert a stream URL to a playable URL.
 // HTTPS streams play directly. HTTP streams are routed through the
-// Node.js re-streaming proxy (/stream/play/) which fetches upstream
-// over HTTP and serves rewritten m3u8 over the same origin (HTTPS).
+// re-streaming proxy (/stream/play/) which fetches upstream over HTTP
+// and serves rewritten m3u8 over the same origin (HTTPS).
+// Works on both Cloudflare Pages (functions/) and Node.js (server.mjs).
 function toStreamUrl(url) {
     if (!url) return url;
     // Already HTTPS — play directly
