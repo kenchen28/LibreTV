@@ -32,6 +32,14 @@
     </div>
 
     <script src="libs/hls.min.js"></script>
+    <script src="libs/sha256.min.js"></script>
+    <script src="js/proxy-auth.js"></script>
     <script src="js/swipe.js"></script>
+
+    <!-- 环境变量注入脚本 -->
+    <script>
+        window.__ENV__ = window.__ENV__ || {};
+        window.__ENV__.PASSWORD = "{{PASSWORD}}";
+    </script>
 </body>
 </html>

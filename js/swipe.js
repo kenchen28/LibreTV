@@ -24,9 +24,13 @@ let hintShown = false;
 const container = document.getElementById('swipeContainer');
 
 // Use proxy on production (HTTPS) to avoid CORS
-function proxyUrl(url) {
+async function proxyUrl(url) {
     if (window.location.protocol === 'https:') {
-        return '/proxy/' + encodeURIComponent(url);
+        const base = '/proxy/' + encodeURIComponent(url);
+        if (window.ProxyAuth && window.ProxyAuth.addAuthToProxyUrl) {
+            return await window.ProxyAuth.addAuthToProxyUrl(base);
+        }
+        return base;
     }
     return url;
 }
@@ -49,7 +53,7 @@ async function fetchVideos(page = 1) {
                 if (currentType) url += `&t=${currentType}`;
                 if (currentHours) url += `&h=${currentHours}`;
 
-                const resp = await fetch(proxyUrl(url), { signal: AbortSignal.timeout(8000) });
+                const resp = await fetch(await proxyUrl(url), { signal: AbortSignal.timeout(8000) });
                 if (!resp.ok) return [];
                 const data = await resp.json();
                 if (!data.list || !data.list.length) return [];
