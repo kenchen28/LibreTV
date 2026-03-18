@@ -1,0 +1,288 @@
+/* Swipe Video App Styles */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+.swipe-app {
+    width: 100%;
+    height: 100vh;
+    background: #000;
+    overflow: hidden;
+    position: relative;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Video container stack */
+.swipe-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.swipe-slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+}
+
+.swipe-slide video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+}
+
+/* Video overlay info */
+.slide-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 60px 16px 24px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    color: #fff;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.slide-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.slide-meta {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.slide-meta span {
+    background: rgba(255,255,255,0.15);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+/* Right side action buttons */
+.slide-actions {
+    position: absolute;
+    right: 12px;
+    bottom: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 6;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #fff;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.action-btn svg {
+    width: 28px;
+    height: 28px;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+
+.action-btn span {
+    font-size: 11px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Play/pause overlay */
+.play-indicator {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 64px; height: 64px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: none;
+    transition: transform 0.2s ease;
+}
+
+.play-indicator.show {
+    transform: translate(-50%, -50%) scale(1);
+    animation: playPulse 0.5s ease forwards;
+}
+
+@keyframes playPulse {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+
+.play-indicator svg {
+    width: 32px; height: 32px;
+    color: #fff;
+}
+
+/* Loading spinner */
+.slide-loading {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+}
+
+.slide-spinner {
+    width: 36px; height: 36px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Top bar */
+.swipe-topbar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 12px 16px;
+    padding-top: max(12px, env(safe-area-inset-top));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 20;
+    background: linear-gradient(rgba(0,0,0,0.4), transparent);
+}
+
+.swipe-topbar a,
+.swipe-topbar button {
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.swipe-topbar a:hover,
+.swipe-topbar button:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+.swipe-topbar .logo {
+    font-weight: 700;
+    font-size: 18px;
+}
+
+/* Category tabs */
+.swipe-tabs {
+    display: flex;
+    gap: 4px;
+}
+
+.swipe-tab {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    border: none;
+    background: none;
+    transition: all 0.2s;
+}
+
+.swipe-tab.active {
+    color: #fff;
+    background: rgba(255,255,255,0.2);
+    font-weight: 600;
+}
+
+/* Progress bar */
+.slide-progress {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: rgba(255,255,255,0.2);
+    z-index: 8;
+}
+
+.slide-progress-bar {
+    height: 100%;
+    background: #fff;
+    width: 0%;
+    transition: width 0.3s linear;
+}
+
+/* Error state */
+.slide-error {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: rgba(255,255,255,0.6);
+    z-index: 4;
+}
+
+.slide-error svg {
+    width: 48px; height: 48px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+}
+
+.slide-error p {
+    font-size: 13px;
+}
+
+/* Swipe hint */
+.swipe-hint {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.5);
+    font-size: 12px;
+    z-index: 6;
+    animation: hintBounce 2s ease infinite;
+    pointer-events: none;
+}
+
+@keyframes hintBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-8px); }
+}
+
+/* Mute button */
+.mute-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 15;
+    background: rgba(0,0,0,0.4);
+    border: none;
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+}
+
+.mute-btn svg { width: 20px; height: 20px; }

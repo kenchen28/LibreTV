@@ -65,7 +65,7 @@ async function renderPage(filePath, password) {
   return content;
 }
 
-app.get(['/', '/index.html', '/player.html', '/live.html'], async (req, res) => {
+app.get(['/', '/index.html', '/player.html', '/live.html', '/swipe.html'], async (req, res) => {
   try {
     let filePath;
     switch (req.path) {
@@ -74,6 +74,9 @@ app.get(['/', '/index.html', '/player.html', '/live.html'], async (req, res) => 
         break;
       case '/live.html':
         filePath = path.join(__dirname, 'live.html');
+        break;
+      case '/swipe.html':
+        filePath = path.join(__dirname, 'swipe.html');
         break;
       default: // '/' 和 '/index.html'
         filePath = path.join(__dirname, 'index.html');

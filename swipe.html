@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>优点TV - 短视频</title>
+    <meta name="description" content="优点TV短视频 - 上下滑动观看热门影视片段">
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="image/logo-black.png">
+    <link rel="stylesheet" href="css/swipe.css">
+</head>
+<body>
+    <div class="swipe-app" id="swipeApp">
+        <!-- Top bar -->
+        <div class="swipe-topbar">
+            <a href="/" class="logo">优点TV</a>
+            <div class="swipe-tabs" id="categoryTabs">
+                <button class="swipe-tab active" data-type="" data-h="72">推荐</button>
+                <button class="swipe-tab" data-type="20" data-h="720">电影</button>
+                <button class="swipe-tab" data-type="30" data-h="168">电视剧</button>
+                <button class="swipe-tab" data-type="39" data-h="168">动漫</button>
+                <button class="swipe-tab" data-type="45" data-h="168">综艺</button>
+                <button class="swipe-tab" data-type="58" data-h="168">短剧</button>
+            </div>
+        </div>
+
+        <!-- Swipe container -->
+        <div class="swipe-container" id="swipeContainer"></div>
+
+        <!-- Swipe hint (shown once) -->
+        <div class="swipe-hint" id="swipeHint">↑ 上滑看下一个</div>
+    </div>
+
+    <script src="libs/hls.min.js"></script>
+    <script src="js/swipe.js"></script>
+</body>
+</html>
