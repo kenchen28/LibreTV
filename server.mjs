@@ -16,7 +16,7 @@ const config = {
   port: process.env.PORT || 8080,
   password: process.env.PASSWORD || '',
   corsOrigin: process.env.CORS_ORIGIN || '*',
-  timeout: parseInt(process.env.REQUEST_TIMEOUT || '5000'),
+  timeout: parseInt(process.env.REQUEST_TIMEOUT || '15000'),
   maxRetries: parseInt(process.env.MAX_RETRIES || '2'),
   cacheMaxAge: process.env.CACHE_MAX_AGE || '1d',
   userAgent: process.env.USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -232,6 +232,180 @@ app.get('/proxy/:encodedUrl', async (req, res) => {
     }
   }
 });
+
+// ============================================================
+// Re-streaming endpoints: proxy HTTP m3u8 streams over HTTPS
+// ============================================================
+
+// Helper: fetch upstream content with retries
+async function fetchUpstream(url, responseType = 'stream') {
+  const maxRetries = config.maxRetries;
+  let retries = 0;
+  const headers = {
+    'User-Agent': config.userAgent,
+    'Accept': '*/*',
+  };
+  // Some IPTV servers check Referer
+  try {
+    const parsed = new URL(url);
+    headers['Referer'] = parsed.origin;
+  } catch {}
+
+  const attempt = async () => {
+    try {
+      return await axios({
+        method: 'get',
+        url,
+        responseType,
+        timeout: config.timeout,
+        headers,
+        maxRedirects: 5,
+      });
+    } catch (err) {
+      if (retries < maxRetries) {
+        retries++;
+        log(`Upstream retry (${retries}/${maxRetries}): ${url}`);
+        return attempt();
+      }
+      throw err;
+    }
+  };
+  return attempt();
+}
+
+// Helper: get base URL for resolving relative paths in m3u8
+function getBaseUrl(urlStr) {
+  try {
+    const u = new URL(urlStr);
+    const parts = u.pathname.split('/');
+    parts.pop();
+    return `${u.origin}${parts.join('/')}/`;
+  } catch {
+    const idx = urlStr.lastIndexOf('/');
+    return idx > 8 ? urlStr.substring(0, idx + 1) : urlStr + '/';
+  }
+}
+
+// Helper: resolve relative URL against base
+function resolveUrl(base, relative) {
+  if (/^https?:\/\//i.test(relative)) return relative;
+  try {
+    return new URL(relative, base).toString();
+  } catch {
+    if (relative.startsWith('/')) {
+      const u = new URL(base);
+      return `${u.origin}${relative}`;
+    }
+    return base.replace(/\/[^/]*$/, '/') + relative;
+  }
+}
+
+// Helper: rewrite m3u8 content — replace all URLs with /stream/seg/ proxy URLs
+function rewriteM3u8(content, originalUrl) {
+  const base = getBaseUrl(originalUrl);
+  const lines = content.split('\n');
+  const out = [];
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+
+    // Rewrite URI="..." in #EXT-X-KEY and #EXT-X-MAP
+    if (line.startsWith('#EXT-X-KEY') || line.startsWith('#EXT-X-MAP')) {
+      out.push(line.replace(/URI="([^"]+)"/, (_, uri) => {
+        const abs = resolveUrl(base, uri);
+        return `URI="/stream/seg/${encodeURIComponent(abs)}"`;
+      }));
+      continue;
+    }
+
+    // Rewrite #EXT-X-MEDIA URI
+    if (line.startsWith('#EXT-X-MEDIA') && line.includes('URI="')) {
+      out.push(line.replace(/URI="([^"]+)"/, (_, uri) => {
+        const abs = resolveUrl(base, uri);
+        return `URI="/stream/play/${encodeURIComponent(abs)}"`;
+      }));
+      continue;
+    }
+
+    // Non-URL lines (tags, empty) — pass through
+    if (line.startsWith('#') || line === '') {
+      out.push(line);
+      continue;
+    }
+
+    // URL line — could be a sub-playlist (.m3u8) or a segment (.ts etc)
+    const abs = resolveUrl(base, line);
+    if (abs.includes('.m3u8') || line.includes('.m3u8')) {
+      out.push(`/stream/play/${encodeURIComponent(abs)}`);
+    } else {
+      out.push(`/stream/seg/${encodeURIComponent(abs)}`);
+    }
+  }
+  return out.join('\n');
+}
+
+// GET /stream/play/:encodedUrl — fetch & rewrite m3u8 playlist
+app.get('/stream/play/:encodedUrl', async (req, res) => {
+  try {
+    const targetUrl = decodeURIComponent(req.params.encodedUrl);
+    log(`[stream/play] ${targetUrl}`);
+
+    if (!isValidUrl(targetUrl)) {
+      return res.status(400).send('Invalid URL');
+    }
+
+    const response = await fetchUpstream(targetUrl, 'text');
+    const m3u8Content = response.data;
+
+    // Rewrite all URLs in the m3u8
+    const rewritten = rewriteM3u8(m3u8Content, targetUrl);
+
+    res.set({
+      'Content-Type': 'application/vnd.apple.mpegurl',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-cache',
+    });
+    res.send(rewritten);
+  } catch (err) {
+    console.error('[stream/play] error:', err.message);
+    const status = err.response?.status || 502;
+    res.status(status).send(`Stream fetch failed: ${err.message}`);
+  }
+});
+
+// GET /stream/seg/:encodedUrl — proxy binary segments, keys, etc.
+app.get('/stream/seg/:encodedUrl', async (req, res) => {
+  try {
+    const targetUrl = decodeURIComponent(req.params.encodedUrl);
+    log(`[stream/seg] ${targetUrl}`);
+
+    if (!isValidUrl(targetUrl)) {
+      return res.status(400).send('Invalid URL');
+    }
+
+    const response = await fetchUpstream(targetUrl, 'stream');
+
+    // Forward relevant headers
+    const fwdHeaders = ['content-type', 'content-length', 'accept-ranges'];
+    for (const h of fwdHeaders) {
+      if (response.headers[h]) {
+        res.set(h, response.headers[h]);
+      }
+    }
+    res.set({
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-cache',
+    });
+
+    response.data.pipe(res);
+  } catch (err) {
+    console.error('[stream/seg] error:', err.message);
+    const status = err.response?.status || 502;
+    res.status(status).send(`Segment fetch failed: ${err.message}`);
+  }
+});
+
+// ============================================================
 
 app.use(express.static(path.join(__dirname), {
   maxAge: config.cacheMaxAge

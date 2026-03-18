@@ -99,7 +99,22 @@ async function fetchM3U(url) {
     return await res.text();
 }
 
-// Parse M3U content into channel objects (HTTPS streams only)
+// Convert a stream URL to a playable URL.
+// HTTPS streams play directly. HTTP streams are routed through the
+// Node.js re-streaming proxy (/stream/play/) which fetches upstream
+// over HTTP and serves rewritten m3u8 over the same origin (HTTPS).
+function toStreamUrl(url) {
+    if (!url) return url;
+    // Already HTTPS — play directly
+    if (url.startsWith('https://')) return url;
+    // HTTP m3u8 — route through re-streaming proxy
+    if (url.startsWith('http://')) {
+        return '/stream/play/' + encodeURIComponent(url);
+    }
+    return url;
+}
+
+// Parse M3U content into channel objects
 function parseM3U(content) {
     const lines = content.split('\n');
     const channels = [];
@@ -119,8 +134,8 @@ function parseM3U(content) {
             };
         } else if (current && line && !line.startsWith('#')) {
             current.url = line;
-            // Only keep HTTPS streams to avoid mixed content issues
-            if (line.startsWith('https://')) {
+            // Accept both HTTP and HTTPS streams
+            if (line.startsWith('http://') || line.startsWith('https://')) {
                 channels.push(current);
             }
             current = null;
@@ -142,7 +157,7 @@ async function loadSource(sourceIndex) {
         allChannels = parseM3U(text);
 
         if (allChannels.length === 0) {
-            channelList.innerHTML = '<div class="channel-loading">未找到可用的HTTPS频道</div>';
+            channelList.innerHTML = '<div class="channel-loading">未找到可用频道</div>';
             return;
         }
 
@@ -253,7 +268,7 @@ function playChannel(index) {
 }
 
 // Play HLS or direct stream
-function playStream(url) {
+function playStream(rawUrl) {
     const video = document.getElementById('liveVideo');
     const emptyState = document.getElementById('emptyState');
 
@@ -265,11 +280,30 @@ function playStream(url) {
         hlsInstance = null;
     }
 
-    if (url.includes('.m3u8') || url.includes('m3u8')) {
+    // Route HTTP streams through the re-streaming proxy
+    const url = toStreamUrl(rawUrl);
+    console.log('[LiveTV] Playing:', url, rawUrl !== url ? '(proxied)' : '(direct)');
+
+    if (url.includes('.m3u8') || url.includes('m3u8') || url.startsWith('/stream/play/')) {
         if (typeof Hls !== 'undefined' && Hls.isSupported()) {
             hlsInstance = new Hls({
                 maxBufferLength: 30,
-                maxMaxBufferLength: 60
+                maxMaxBufferLength: 60,
+                manifestLoadingTimeOut: 15000,
+                manifestLoadingMaxRetry: 3,
+                levelLoadingTimeOut: 15000,
+                fragLoadingTimeOut: 20000,
+                // Intercept all XHR requests from HLS.js:
+                // If HLS.js tries to load an http:// URL (e.g. from a master
+                // playlist that points to HTTP sub-playlists), rewrite it to
+                // go through our /stream/ proxy to avoid mixed content errors.
+                xhrSetup: function(xhr, urlToLoad) {
+                    if (urlToLoad.startsWith('http://')) {
+                        const proxied = toStreamUrl(urlToLoad);
+                        console.log('[HLS xhrSetup] Rewriting HTTP URL:', urlToLoad, '->', proxied);
+                        xhr.open('GET', proxied, true);
+                    }
+                }
             });
             hlsInstance.loadSource(url);
             hlsInstance.attachMedia(video);
@@ -280,9 +314,10 @@ function playStream(url) {
                 if (data.fatal) {
                     console.error('HLS fatal error:', data);
                     if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                        hlsInstance.startLoad();
+                        // Try once to recover from network error
+                        setTimeout(() => hlsInstance.startLoad(), 1000);
                     } else {
-                        showPlayerError();
+                        showPlayerError('频道加载失败，该频道可能暂时不可用');
                     }
                 }
             });
