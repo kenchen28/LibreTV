@@ -100,16 +100,16 @@ async function fetchM3U(url) {
 }
 
 // Convert a stream URL to a playable URL.
-// HTTPS streams play directly. HTTP streams are routed through the
-// re-streaming proxy (/stream/play/) which fetches upstream over HTTP
-// and serves rewritten m3u8 over the same origin (HTTPS).
-// Works on both Cloudflare Pages (functions/) and Node.js (server.mjs).
+// On HTTPS pages, HTTP streams cause mixed-content errors, so we route
+// them through the re-streaming proxy (/stream/play/).
+// On HTTP pages (e.g. localhost dev), HTTP streams play directly — no proxy
+// needed, and the proxy server may not even be able to reach the upstream.
 function toStreamUrl(url) {
     if (!url) return url;
     // Already HTTPS — play directly
     if (url.startsWith('https://')) return url;
-    // HTTP m3u8 — route through re-streaming proxy
-    if (url.startsWith('http://')) {
+    // Only proxy HTTP streams when the page itself is HTTPS (mixed content)
+    if (url.startsWith('http://') && window.location.protocol === 'https:') {
         return '/stream/play/' + encodeURIComponent(url);
     }
     return url;
@@ -299,7 +299,7 @@ function playStream(rawUrl) {
                 // playlist that points to HTTP sub-playlists), rewrite it to
                 // go through our /stream/ proxy to avoid mixed content errors.
                 xhrSetup: function(xhr, urlToLoad) {
-                    if (urlToLoad.startsWith('http://')) {
+                    if (urlToLoad.startsWith('http://') && window.location.protocol === 'https:') {
                         const proxied = toStreamUrl(urlToLoad);
                         console.log('[HLS xhrSetup] Rewriting HTTP URL:', urlToLoad, '->', proxied);
                         xhr.open('GET', proxied, true);
