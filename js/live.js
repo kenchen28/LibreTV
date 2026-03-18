@@ -249,16 +249,25 @@ function playChannel(index) {
     playStream(channel.url);
 }
 
-// Proxy a stream URL through /proxy/ to avoid mixed content on HTTPS pages
-async function getProxiedStreamUrl(url) {
-    // Only proxy http:// URLs when the page is served over HTTPS
-    if (window.location.protocol === 'https:' && url.startsWith('http://')) {
-        const proxyUrl = '/proxy/' + encodeURIComponent(url);
-        return window.ProxyAuth?.addAuthToProxyUrl
-            ? await window.ProxyAuth.addAuthToProxyUrl(proxyUrl)
-            : proxyUrl;
+// Cache auth params so we can add them synchronously in xhrSetup
+let _cachedAuthSuffix = '';
+
+async function refreshAuthSuffix() {
+    const hash = await window.ProxyAuth?.getPasswordHash?.();
+    if (hash) {
+        _cachedAuthSuffix = `auth=${encodeURIComponent(hash)}&t=${Date.now()}`;
     }
-    return url;
+}
+
+// Build a proxied URL string (synchronous, uses cached auth)
+function buildProxyUrl(url) {
+    const base = '/proxy/' + encodeURIComponent(url);
+    return _cachedAuthSuffix ? `${base}?${_cachedAuthSuffix}` : base;
+}
+
+// Whether we need to proxy this URL
+function needsProxy(url) {
+    return window.location.protocol === 'https:' && url.startsWith('http://');
 }
 
 // Play HLS or direct stream
@@ -274,18 +283,38 @@ async function playStream(url) {
         hlsInstance = null;
     }
 
-    const streamUrl = await getProxiedStreamUrl(url);
+    // Pre-cache auth params before creating HLS instance
+    await refreshAuthSuffix();
+
+    const isHttpStream = url.startsWith('http://');
+    const useProxy = needsProxy(url);
+    const streamUrl = useProxy ? buildProxyUrl(url) : url;
+
+    // For proxied http:// streams, verify the proxy can reach the upstream first
+    if (useProxy) {
+        try {
+            const testResp = await fetch(streamUrl, { method: 'HEAD' });
+            if (!testResp.ok) {
+                showPlayerError('该频道源不支持HTTPS代理访问（源服务器拒绝连接），请尝试其他频道');
+                return;
+            }
+        } catch (e) {
+            showPlayerError('该频道源无法通过代理访问，请尝试其他频道');
+            return;
+        }
+    }
 
     if (url.includes('.m3u8') || url.includes('m3u8')) {
         if (typeof Hls !== 'undefined' && Hls.isSupported()) {
             hlsInstance = new Hls({
                 maxBufferLength: 30,
                 maxMaxBufferLength: 60,
-                xhrSetup: async function(xhr, xhrUrl) {
-                    // Proxy any http:// sub-requests (segments, keys) through /proxy/
-                    if (window.location.protocol === 'https:' && xhrUrl.startsWith('http://')) {
-                        const proxied = await getProxiedStreamUrl(xhrUrl);
-                        xhr.open('GET', proxied, true);
+                xhrSetup: function(xhr, xhrUrl) {
+                    // The proxy rewrites m3u8 segment URLs to /proxy/... paths,
+                    // but they still need auth params appended.
+                    if (xhrUrl.startsWith('/proxy/') && !xhrUrl.includes('auth=')) {
+                        const sep = xhrUrl.includes('?') ? '&' : '?';
+                        xhr.open('GET', `${xhrUrl}${sep}${_cachedAuthSuffix}`, true);
                     }
                 }
             });
@@ -298,7 +327,11 @@ async function playStream(url) {
                 if (data.fatal) {
                     console.error('HLS fatal error:', data);
                     if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                        hlsInstance.startLoad();
+                        if (useProxy) {
+                            showPlayerError('频道加载失败，源服务器可能不支持代理访问');
+                        } else {
+                            hlsInstance.startLoad();
+                        }
                     } else {
                         showPlayerError();
                     }
@@ -311,19 +344,19 @@ async function playStream(url) {
             showPlayerError();
         }
     } else {
-        video.src = streamUrl;
+        video.src = useProxy ? buildProxyUrl(url) : url;
         video.play().catch(() => {});
     }
 }
 
-function showPlayerError() {
+function showPlayerError(message) {
     const video = document.getElementById('liveVideo');
     video.style.display = 'none';
     const emptyState = document.getElementById('emptyState');
     emptyState.style.display = 'flex';
     emptyState.innerHTML = `
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <p>频道加载失败，请尝试其他频道</p>
+        <p>${message || '频道加载失败，请尝试其他频道'}</p>
     `;
 }
 
