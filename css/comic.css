@@ -1,0 +1,352 @@
+/* Comic/Manga Reader Styles */
+.comic-layout {
+    display: flex;
+    height: calc(100vh - 60px);
+    overflow: hidden;
+}
+
+.comic-sidebar {
+    width: 320px;
+    min-width: 320px;
+    background: #f5f4ee;
+    border-right: 1px solid #e5e4de;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: margin-left 0.3s ease;
+}
+
+.comic-sidebar.collapsed {
+    margin-left: -320px;
+}
+
+.sidebar-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e4de;
+    background: #f0efe9;
+}
+
+.sidebar-header input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e5e4de;
+    border-radius: 8px;
+    background: white;
+    font-size: 14px;
+    outline: none;
+}
+
+.sidebar-header input:focus {
+    border-color: #6366f1;
+}
+
+.source-select {
+    margin-top: 8px;
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #e5e4de;
+    border-radius: 6px;
+    background: white;
+    font-size: 13px;
+}
+
+.manga-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.manga-card {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 4px;
+}
+
+.manga-card:hover {
+    background: #eae9e3;
+}
+
+.manga-card.active {
+    background: #e0dfd9;
+}
+
+.manga-cover {
+    width: 60px;
+    height: 80px;
+    border-radius: 4px;
+    object-fit: cover;
+    background: #e5e4de;
+    flex-shrink: 0;
+}
+
+.manga-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.manga-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.manga-desc {
+    font-size: 12px;
+    color: #888;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.manga-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+.manga-tag {
+    font-size: 10px;
+    padding: 1px 6px;
+    background: #e5e4de;
+    border-radius: 4px;
+    color: #666;
+}
+
+/* Main content area */
+.comic-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #faf9f5;
+}
+
+.chapter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #f0efe9;
+    border-bottom: 1px solid #e5e4de;
+    flex-shrink: 0;
+}
+
+.chapter-bar select {
+    flex: 1;
+    max-width: 300px;
+    padding: 6px 10px;
+    border: 1px solid #e5e4de;
+    border-radius: 6px;
+    background: white;
+    font-size: 13px;
+}
+
+.chapter-nav-btn {
+    padding: 6px 14px;
+    border: 1px solid #e5e4de;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.chapter-nav-btn:hover {
+    background: #6366f1;
+    color: white;
+    border-color: #6366f1;
+}
+
+.chapter-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.chapter-nav-btn:disabled:hover {
+    background: white;
+    color: inherit;
+    border-color: #e5e4de;
+}
+
+/* Reader area */
+.reader-area {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    gap: 4px;
+}
+
+.reader-area.empty {
+    justify-content: center;
+}
+
+.reader-area img {
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+}
+
+.reader-placeholder {
+    text-align: center;
+    color: #999;
+}
+
+.reader-placeholder svg {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+}
+
+.reader-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px;
+    color: #888;
+}
+
+/* Spinner */
+.comic-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e5e4de;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Mobile toggle */
+.mobile-comic-toggle {
+    display: none;
+    padding: 8px 16px;
+    background: #f0efe9;
+    border-bottom: 1px solid #e5e4de;
+    text-align: center;
+    cursor: pointer;
+    font-size: 13px;
+    color: #666;
+}
+
+/* Hot/trending section */
+.trending-section {
+    padding: 8px;
+    border-bottom: 1px solid #e5e4de;
+}
+
+.trending-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+    padding: 4px 8px;
+    margin-bottom: 4px;
+}
+
+.trending-list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 8px 8px;
+}
+
+.trending-item {
+    flex-shrink: 0;
+    width: 80px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.trending-item img {
+    width: 80px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: #e5e4de;
+}
+
+.trending-item .trending-name {
+    font-size: 11px;
+    color: #555;
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Language filter tabs */
+.lang-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px;
+    border-bottom: 1px solid #e5e4de;
+    overflow-x: auto;
+}
+
+.lang-tab {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    cursor: pointer;
+    background: #eae9e3;
+    color: #666;
+    border: none;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.lang-tab.active {
+    background: #6366f1;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .comic-sidebar {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        bottom: 0;
+        z-index: 30;
+        width: 100%;
+        min-width: unset;
+    }
+
+    .comic-sidebar.collapsed {
+        margin-left: 0;
+        transform: translateX(-100%);
+    }
+
+    .mobile-comic-toggle {
+        display: block;
+    }
+
+    .chapter-bar {
+        flex-wrap: wrap;
+    }
+
+    .chapter-bar select {
+        max-width: unset;
+    }
+}

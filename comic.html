@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优点漫画 - 免费在线漫画阅读</title>
+    <meta name="description" content="优点漫画是一个免费的在线漫画搜索与阅读平台，支持日漫、韩漫、国漫等多种漫画源。">
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="image/logo-black.png">
+    <script src="libs/tailwindcss.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/comic.css">
+</head>
+<body class="page-bg text-gray-800">
+    <!-- Navigation -->
+    <header class="bg-white border-b border-gray-200 shadow-sm relative z-20" style="height:60px">
+        <div class="max-w-7xl mx-auto px-5">
+            <div class="flex items-center justify-between py-3">
+                <a href="/" class="text-xl font-bold text-gray-800 hover:text-indigo-700 transition-colors">优点TV</a>
+                <nav class="flex gap-4 items-center">
+                    <a href="/" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">影视搜索</a>
+                    <a href="/live.html" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">电视直播</a>
+                    <a href="/comic.html" class="px-3 py-1.5 rounded-md font-medium text-sm bg-indigo-600 text-white rounded-md">漫画</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile toggle -->
+    <div class="mobile-comic-toggle" id="mobileToggle" onclick="toggleSidebar()">▼ 展开漫画列表</div>
+
+    <!-- Main layout -->
+    <div class="comic-layout">
+        <!-- Sidebar: search + manga list -->
+        <div class="comic-sidebar" id="comicSidebar">
+            <div class="sidebar-header">
+                <input type="text" id="searchInput" placeholder="搜索漫画..." onkeydown="if(event.key==='Enter')searchManga()">
+                <select class="source-select" id="langSelect" onchange="onLangChange()">
+                    <option value="zh">中文</option>
+                    <option value="zh-hk">中文(港台)</option>
+                    <option value="en" selected>English</option>
+                    <option value="ja">日本語</option>
+                    <option value="ko">한국어</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="pt-br">Português</option>
+                </select>
+            </div>
+
+            <!-- Trending -->
+            <div class="trending-section" id="trendingSection">
+                <div class="trending-title">🔥 热门漫画</div>
+                <div class="trending-list" id="trendingList">
+                    <div class="reader-loading"><div class="comic-spinner"></div></div>
+                </div>
+            </div>
+
+            <!-- Search results / manga list -->
+            <div class="manga-list" id="mangaList">
+                <div class="reader-loading"><div class="comic-spinner"></div>搜索或浏览热门漫画</div>
+            </div>
+        </div>
+
+        <!-- Main: chapter select + reader -->
+        <div class="comic-main">
+            <div class="chapter-bar" id="chapterBar" style="display:none">
+                <button class="chapter-nav-btn" id="prevChBtn" onclick="prevChapter()" disabled>上一话</button>
+                <select id="chapterSelect" onchange="loadChapter(this.value)"></select>
+                <button class="chapter-nav-btn" id="nextChBtn" onclick="nextChapter()" disabled>下一话</button>
+                <button class="chapter-nav-btn" onclick="toggleSidebar()" style="margin-left:auto">📚 列表</button>
+            </div>
+            <div class="reader-area empty" id="readerArea">
+                <div class="reader-placeholder">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <p>搜索漫画或从热门列表中选择开始阅读</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/comic.js"></script>
+</body>
+</html>
