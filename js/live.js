@@ -99,7 +99,7 @@ async function fetchM3U(url) {
     return await res.text();
 }
 
-// Parse M3U content into channel objects
+// Parse M3U content into channel objects (HTTPS streams only)
 function parseM3U(content) {
     const lines = content.split('\n');
     const channels = [];
@@ -119,7 +119,10 @@ function parseM3U(content) {
             };
         } else if (current && line && !line.startsWith('#')) {
             current.url = line;
-            channels.push(current);
+            // Only keep HTTPS streams to avoid mixed content issues
+            if (line.startsWith('https://')) {
+                channels.push(current);
+            }
             current = null;
         }
     }
@@ -139,7 +142,7 @@ async function loadSource(sourceIndex) {
         allChannels = parseM3U(text);
 
         if (allChannels.length === 0) {
-            channelList.innerHTML = '<div class="channel-loading">未找到频道</div>';
+            channelList.innerHTML = '<div class="channel-loading">未找到可用的HTTPS频道</div>';
             return;
         }
 
@@ -249,29 +252,8 @@ function playChannel(index) {
     playStream(channel.url);
 }
 
-// Cache auth params so we can add them synchronously in xhrSetup
-let _cachedAuthSuffix = '';
-
-async function refreshAuthSuffix() {
-    const hash = await window.ProxyAuth?.getPasswordHash?.();
-    if (hash) {
-        _cachedAuthSuffix = `auth=${encodeURIComponent(hash)}&t=${Date.now()}`;
-    }
-}
-
-// Build a proxied URL string (synchronous, uses cached auth)
-function buildProxyUrl(url) {
-    const base = '/proxy/' + encodeURIComponent(url);
-    return _cachedAuthSuffix ? `${base}?${_cachedAuthSuffix}` : base;
-}
-
-// Whether we need to proxy this URL
-function needsProxy(url) {
-    return window.location.protocol === 'https:' && url.startsWith('http://');
-}
-
 // Play HLS or direct stream
-async function playStream(url) {
+function playStream(url) {
     const video = document.getElementById('liveVideo');
     const emptyState = document.getElementById('emptyState');
 
@@ -283,39 +265,13 @@ async function playStream(url) {
         hlsInstance = null;
     }
 
-    // Pre-cache auth params before creating HLS instance
-    await refreshAuthSuffix();
-
-    const isHttpStream = url.startsWith('http://');
-    const useProxy = needsProxy(url);
-    const streamUrl = useProxy ? buildProxyUrl(url) : url;
-
     if (url.includes('.m3u8') || url.includes('m3u8')) {
         if (typeof Hls !== 'undefined' && Hls.isSupported()) {
             hlsInstance = new Hls({
                 maxBufferLength: 30,
-                maxMaxBufferLength: 60,
-                xhrSetup: function(xhr, xhrUrl) {
-                    let finalUrl = xhrUrl;
-
-                    // If HLS.js tries to load a raw http:// URL on an HTTPS page,
-                    // redirect it through the proxy (handles URLs the server-side
-                    // M3U8 rewriter may have missed).
-                    if (window.location.protocol === 'https:' && xhrUrl.startsWith('http://')) {
-                        finalUrl = buildProxyUrl(xhrUrl);
-                    }
-                    // Append auth to any /proxy/ URL that doesn't have it yet
-                    else if (xhrUrl.startsWith('/proxy/') && !xhrUrl.includes('auth=') && _cachedAuthSuffix) {
-                        const sep = xhrUrl.includes('?') ? '&' : '?';
-                        finalUrl = `${xhrUrl}${sep}${_cachedAuthSuffix}`;
-                    }
-
-                    if (finalUrl !== xhrUrl) {
-                        xhr.open('GET', finalUrl, true);
-                    }
-                }
+                maxMaxBufferLength: 60
             });
-            hlsInstance.loadSource(streamUrl);
+            hlsInstance.loadSource(url);
             hlsInstance.attachMedia(video);
             hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
                 video.play().catch(() => {});
@@ -324,24 +280,20 @@ async function playStream(url) {
                 if (data.fatal) {
                     console.error('HLS fatal error:', data);
                     if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                        if (useProxy) {
-                            showPlayerError('频道加载失败，源服务器可能不支持代理访问');
-                        } else {
-                            hlsInstance.startLoad();
-                        }
+                        hlsInstance.startLoad();
                     } else {
                         showPlayerError();
                     }
                 }
             });
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = streamUrl;
+            video.src = url;
             video.play().catch(() => {});
         } else {
             showPlayerError();
         }
     } else {
-        video.src = useProxy ? buildProxyUrl(url) : url;
+        video.src = url;
         video.play().catch(() => {});
     }
 }
