@@ -290,31 +290,28 @@ async function playStream(url) {
     const useProxy = needsProxy(url);
     const streamUrl = useProxy ? buildProxyUrl(url) : url;
 
-    // For proxied http:// streams, verify the proxy can reach the upstream first
-    if (useProxy) {
-        try {
-            const testResp = await fetch(streamUrl, { method: 'HEAD' });
-            if (!testResp.ok) {
-                showPlayerError('该频道源不支持HTTPS代理访问（源服务器拒绝连接），请尝试其他频道');
-                return;
-            }
-        } catch (e) {
-            showPlayerError('该频道源无法通过代理访问，请尝试其他频道');
-            return;
-        }
-    }
-
     if (url.includes('.m3u8') || url.includes('m3u8')) {
         if (typeof Hls !== 'undefined' && Hls.isSupported()) {
             hlsInstance = new Hls({
                 maxBufferLength: 30,
                 maxMaxBufferLength: 60,
                 xhrSetup: function(xhr, xhrUrl) {
-                    // The proxy rewrites m3u8 segment URLs to /proxy/... paths,
-                    // but they still need auth params appended.
-                    if (xhrUrl.startsWith('/proxy/') && !xhrUrl.includes('auth=')) {
+                    let finalUrl = xhrUrl;
+
+                    // If HLS.js tries to load a raw http:// URL on an HTTPS page,
+                    // redirect it through the proxy (handles URLs the server-side
+                    // M3U8 rewriter may have missed).
+                    if (window.location.protocol === 'https:' && xhrUrl.startsWith('http://')) {
+                        finalUrl = buildProxyUrl(xhrUrl);
+                    }
+                    // Append auth to any /proxy/ URL that doesn't have it yet
+                    else if (xhrUrl.startsWith('/proxy/') && !xhrUrl.includes('auth=') && _cachedAuthSuffix) {
                         const sep = xhrUrl.includes('?') ? '&' : '?';
-                        xhr.open('GET', `${xhrUrl}${sep}${_cachedAuthSuffix}`, true);
+                        finalUrl = `${xhrUrl}${sep}${_cachedAuthSuffix}`;
+                    }
+
+                    if (finalUrl !== xhrUrl) {
+                        xhr.open('GET', finalUrl, true);
                     }
                 }
             });
