@@ -249,8 +249,20 @@ function playChannel(index) {
     playStream(channel.url);
 }
 
+// Proxy a stream URL through /proxy/ to avoid mixed content on HTTPS pages
+async function getProxiedStreamUrl(url) {
+    // Only proxy http:// URLs when the page is served over HTTPS
+    if (window.location.protocol === 'https:' && url.startsWith('http://')) {
+        const proxyUrl = '/proxy/' + encodeURIComponent(url);
+        return window.ProxyAuth?.addAuthToProxyUrl
+            ? await window.ProxyAuth.addAuthToProxyUrl(proxyUrl)
+            : proxyUrl;
+    }
+    return url;
+}
+
 // Play HLS or direct stream
-function playStream(url) {
+async function playStream(url) {
     const video = document.getElementById('liveVideo');
     const emptyState = document.getElementById('emptyState');
 
@@ -262,13 +274,22 @@ function playStream(url) {
         hlsInstance = null;
     }
 
+    const streamUrl = await getProxiedStreamUrl(url);
+
     if (url.includes('.m3u8') || url.includes('m3u8')) {
         if (typeof Hls !== 'undefined' && Hls.isSupported()) {
             hlsInstance = new Hls({
                 maxBufferLength: 30,
                 maxMaxBufferLength: 60,
+                xhrSetup: async function(xhr, xhrUrl) {
+                    // Proxy any http:// sub-requests (segments, keys) through /proxy/
+                    if (window.location.protocol === 'https:' && xhrUrl.startsWith('http://')) {
+                        const proxied = await getProxiedStreamUrl(xhrUrl);
+                        xhr.open('GET', proxied, true);
+                    }
+                }
             });
-            hlsInstance.loadSource(url);
+            hlsInstance.loadSource(streamUrl);
             hlsInstance.attachMedia(video);
             hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
                 video.play().catch(() => {});
@@ -284,13 +305,13 @@ function playStream(url) {
                 }
             });
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = url;
+            video.src = streamUrl;
             video.play().catch(() => {});
         } else {
             showPlayerError();
         }
     } else {
-        video.src = url;
+        video.src = streamUrl;
         video.play().catch(() => {});
     }
 }
