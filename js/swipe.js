@@ -20,6 +20,7 @@ let touchDeltaY = 0;
 let isSwiping = false;
 let hlsInstances = {};     // track HLS instances per slide
 let hintShown = false;
+let slideTimers = {};      // auto-skip timers for failed videos
 
 const container = document.getElementById('swipeContainer');
 
@@ -84,6 +85,22 @@ async function fetchVideos(page = 1) {
 
         const results = await Promise.all(fetches);
         results.forEach(r => allValid.push(...r));
+
+        // Pre-validate m3u8 URLs: quick HEAD check to filter out dead links
+        const validated = await Promise.all(allValid.map(async (v) => {
+            try {
+                const checkUrl = await proxyUrl(v.m3u8);
+                const resp = await fetch(checkUrl, {
+                    method: 'HEAD',
+                    signal: AbortSignal.timeout(5000),
+                });
+                // Accept if server responds (even 3xx redirects are fine)
+                return resp.ok || resp.status === 302 || resp.status === 301 ? v : null;
+            } catch {
+                return null;
+            }
+        }));
+        allValid = validated.filter(Boolean);
 
         // Deduplicate by name
         const seen = new Set();
@@ -220,6 +237,7 @@ function playSlide(index) {
             hls.loadSource(v.m3u8);
             hls.attachMedia(video);
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                clearTimeout(slideTimers[index]);
                 video.play().catch(() => {});
                 hideLoading(slide);
             });
@@ -227,6 +245,7 @@ function playSlide(index) {
                 if (data.fatal) {
                     hideLoading(slide);
                     showSlideError(slide);
+                    autoSkipFailed(index);
                 }
             });
             hlsInstances[index] = hls;
@@ -234,8 +253,13 @@ function playSlide(index) {
             // Safari native HLS
             video.src = v.m3u8;
             video.addEventListener('loadedmetadata', () => {
+                clearTimeout(slideTimers[index]);
                 video.play().catch(() => {});
                 hideLoading(slide);
+            }, { once: true });
+            video.addEventListener('error', () => {
+                showSlideError(slide);
+                autoSkipFailed(index);
             }, { once: true });
         }
     } else {
@@ -243,6 +267,14 @@ function playSlide(index) {
         video.play().catch(() => {});
         hideLoading(slide);
     }
+
+    // Playback timeout: if video doesn't start within 10s, auto-skip
+    slideTimers[index] = setTimeout(() => {
+        if (index === currentIndex && video.readyState < 2) {
+            showSlideError(slide);
+            autoSkipFailed(index);
+        }
+    }, 10000);
 }
 
 function stopSlide(index) {
@@ -257,6 +289,8 @@ function stopSlide(index) {
         hlsInstances[index].destroy();
         delete hlsInstances[index];
     }
+    clearTimeout(slideTimers[index]);
+    delete slideTimers[index];
 }
 
 function hideLoading(slide) {
@@ -270,9 +304,21 @@ function showSlideError(slide) {
         loader.style.display = '';
         loader.innerHTML = `<div class="slide-error">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <p>视频加载失败，上滑跳过</p>
+            <p>视频加载失败，自动跳过...</p>
         </div>`;
     }
+}
+
+// Auto-skip unplayable videos after a brief delay
+function autoSkipFailed(index) {
+    // Only skip if this is still the current slide
+    if (index !== currentIndex) return;
+    clearTimeout(slideTimers[index]);
+    slideTimers[index] = setTimeout(() => {
+        if (index === currentIndex && currentIndex < videos.length - 1) {
+            goToSlide(currentIndex + 1);
+        }
+    }, 1500);
 }
 
 // ── Swipe navigation ──
