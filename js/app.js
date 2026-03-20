@@ -629,6 +629,10 @@ async function search() {
         return;
     }
 
+    // GTM tracking
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'video_search', search_query: query });
+
     if (selectedAPIs.length === 0) {
         showToast('请至少选择一个API源', 'warning');
         return;
@@ -856,6 +860,9 @@ document.addEventListener('DOMContentLoaded', hookInput);
 
 // 显示详情 - 修改为支持自定义API
 async function showDetails(id, vod_name, sourceCode) {
+    // GTM tracking
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'video_detail', video_id: id, video_title: vod_name, source: sourceCode });
     // 密码保护校验
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {
@@ -988,6 +995,10 @@ async function showDetails(id, vod_name, sourceCode) {
 
 // 更新播放视频函数，修改为使用/watch路径而不是直接打开player.html
 function playVideo(url, vod_name, sourceCode, episodeIndex = 0, vodId = '') {
+    // GTM tracking
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'video_play', video_title: vod_name, source: sourceCode, episode_index: episodeIndex });
+
     // 密码保护校验
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {

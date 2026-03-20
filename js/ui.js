@@ -1,5 +1,9 @@
 // UI相关函数
 function toggleSettings(e) {
+    // GTM tracking
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'settings_toggle' });
+
     // 强化的密码保护校验 - 防止绕过
     try {
         if (window.ensurePasswordProtection) {
@@ -307,6 +311,10 @@ function clearSearchHistory() {
 
 // 历史面板相关函数
 function toggleHistory(e) {
+    // GTM tracking
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'history_view' });
+
     // 密码保护校验
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {
