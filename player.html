@@ -138,6 +138,13 @@
                         </svg>
                     </button>
                     
+                    <!-- 投屏按钮 -->
+                    <button id="castButton" title="投屏" onclick="castScreen()" class="px-2 py-1 bg-[#eae9e3] hover:bg-[#e5e4de] border border-[#e5e4de] text-gray-800 rounded-lg transition flex-shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 16.1A5 5 0 015.9 20M2 12.05A9 9 0 019.95 20M2 8V6a2 2 0 012-2h16a2 2 0 012 2v12a2 2 0 01-2 2h-6M2 20h.01" />
+                        </svg>
+                    </button>
+                    
                     <!-- 锁定控制按钮 - 始终显示在最右侧 -->
                     <button id="lockToggle" onclick="toggleControlsLock()" title="锁定控制" 
                             class="px-2 py-1 bg-[#eae9e3] hover:bg-[#e5e4de] border border-[#e5e4de] text-gray-800 rounded-lg transition flex-shrink-0">
@@ -237,6 +244,205 @@
     <script src="js/api.js"></script>
     <script src="js/search.js"></script>
     <script src="js/player.js"></script>
+
+    <script>
+        // 投屏功能
+        function castScreen() {
+            const video = art && art.video;
+            if (!video) {
+                showCastToast('请先播放视频', 'error');
+                return;
+            }
+
+            // Method 1: Remote Playback API (Chrome/Edge Chromecast, Safari AirPlay)
+            if (video.remote && typeof video.remote.prompt === 'function') {
+                video.remote.prompt().then(() => {
+                    showCastToast('已连接投屏设备', 'success');
+                }).catch((err) => {
+                    // User cancelled or no device found — try fallback
+                    if (err.name === 'NotFoundError') {
+                        showCastToast('未找到投屏设备', 'error');
+                    } else if (err.name === 'NotAllowedError' || err.name === 'AbortError') {
+                        // User cancelled, try PiP as alternative
+                        tryCastFallback(video);
+                    } else {
+                        tryCastFallback(video);
+                    }
+                });
+                return;
+            }
+
+            // Method 2: WebKit playback target (Safari AirPlay)
+            if (typeof video.webkitShowPlaybackTargetPicker === 'function') {
+                video.webkitShowPlaybackTargetPicker();
+                return;
+            }
+
+            // Fallback
+            tryCastFallback(video);
+        }
+
+        function tryCastFallback(video) {
+            // Show a modal with casting options
+            const currentUrl = video.src || (art && art.url) || '';
+            showCastModal(currentUrl);
+        }
+
+        function showCastModal(videoUrl) {
+            // Remove existing modal if any
+            const existing = document.getElementById('castModal');
+            if (existing) existing.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'castModal';
+            modal.className = 'fixed inset-0 bg-black/80 flex items-center justify-center z-[10002]';
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+
+            modal.innerHTML = `
+                <div class="bg-[#f5f4ee] p-6 rounded-lg w-11/12 max-w-md border border-[#e5e4de]" onclick="event.stopPropagation()">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold gradient-text">📺 投屏播放</h3>
+                        <button onclick="document.getElementById('castModal').remove()" class="text-gray-500 hover:text-indigo-600 text-2xl">&times;</button>
+                    </div>
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-600 mb-3">选择投屏方式：</p>
+                        
+                        <button onclick="tryPiP()" class="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition flex items-center gap-3">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <rect x="2" y="3" width="20" height="14" rx="2" stroke-width="2"/>
+                                <rect x="11" y="10" width="9" height="6" rx="1" stroke-width="2"/>
+                            </svg>
+                            <div class="text-left">
+                                <div class="font-medium">画中画模式</div>
+                                <div class="text-xs text-indigo-200">小窗播放，可同时浏览其他内容</div>
+                            </div>
+                        </button>
+                        
+                        <button onclick="copyCastUrl()" class="w-full px-4 py-3 bg-[#eae9e3] hover:bg-[#e5e4de] border border-[#e5e4de] text-gray-800 rounded-lg transition flex items-center gap-3">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                            <div class="text-left">
+                                <div class="font-medium">复制视频链接</div>
+                                <div class="text-xs text-gray-500">复制后在电视浏览器或投屏App中打开</div>
+                            </div>
+                        </button>
+                        
+                        <button onclick="openInNewWindow()" class="w-full px-4 py-3 bg-[#eae9e3] hover:bg-[#e5e4de] border border-[#e5e4de] text-gray-800 rounded-lg transition flex items-center gap-3">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                            <div class="text-left">
+                                <div class="font-medium">新窗口打开视频</div>
+                                <div class="text-xs text-gray-500">在新窗口直接播放视频流</div>
+                            </div>
+                        </button>
+                        
+                        <p class="text-xs text-gray-400 mt-2 pt-2 border-t border-[#e5e4de]">
+                            💡 提示：Chrome浏览器可通过右上角菜单"投射"功能将整个标签页投屏到Chromecast设备。Safari用户可使用AirPlay。
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+        }
+
+        function tryPiP() {
+            const modal = document.getElementById('castModal');
+            if (modal) modal.remove();
+
+            const video = art && art.video;
+            if (!video) return;
+
+            if (document.pictureInPictureEnabled && typeof video.requestPictureInPicture === 'function') {
+                video.requestPictureInPicture().catch((err) => {
+                    showCastToast('画中画启动失败: ' + err.message, 'error');
+                });
+            } else if (typeof video.webkitSetPresentationMode === 'function') {
+                // Safari
+                video.webkitSetPresentationMode('picture-in-picture');
+            } else {
+                showCastToast('当前浏览器不支持画中画', 'error');
+            }
+        }
+
+        function copyCastUrl() {
+            const modal = document.getElementById('castModal');
+            if (modal) modal.remove();
+
+            const video = art && art.video;
+            const url = (video && video.src) || (art && art.url) || '';
+            if (!url) {
+                showCastToast('无法获取视频链接', 'error');
+                return;
+            }
+
+            navigator.clipboard.writeText(url).then(() => {
+                showCastToast('视频链接已复制', 'success');
+            }).catch(() => {
+                // Fallback for older browsers
+                const ta = document.createElement('textarea');
+                ta.value = url;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showCastToast('视频链接已复制', 'success');
+            });
+        }
+
+        function openInNewWindow() {
+            const modal = document.getElementById('castModal');
+            if (modal) modal.remove();
+
+            const video = art && art.video;
+            const url = (video && video.src) || (art && art.url) || '';
+            if (url) {
+                window.open(url, '_blank');
+            } else {
+                showCastToast('无法获取视频链接', 'error');
+            }
+        }
+
+        function showCastToast(message, type) {
+            const existing = document.getElementById('castToast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'castToast';
+            const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+            toast.className = `fixed top-20 left-1/2 -translate-x-1/2 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-[10003] text-sm font-medium transition-opacity duration-300`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        // Check Remote Playback API support and update button state
+        document.addEventListener('DOMContentLoaded', function() {
+            const castBtn = document.getElementById('castButton');
+            if (castBtn) {
+                // Add a subtle indicator if native casting is available
+                const video = document.querySelector('video');
+                if (video && video.remote) {
+                    video.remote.watchAvailability((available) => {
+                        if (available) {
+                            castBtn.classList.add('text-indigo-600');
+                            castBtn.title = '投屏 (已发现设备)';
+                        }
+                    }).catch(() => {
+                        // watchAvailability not supported, that's fine
+                    });
+                }
+            }
+        });
+    </script>
 
     <script>
         // 创建全局环境变量对象
