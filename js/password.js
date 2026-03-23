@@ -138,7 +138,7 @@ function showPasswordModal() {
             const title = passwordModal.querySelector('h2');
             const description = passwordModal.querySelector('p');
             if (title) title.textContent = '访问验证';
-            if (description) description.innerHTML = '请输入密码继续访问<br><a href="https://gitdocker.com" target="_blank" rel="noopener noreferrer" style="color:#3b82f6;font-size:0.875rem;">免费注册登录后会自动显示</a>';
+            if (description) description.innerHTML = '请输入密码继续访问<br><a href="https://gitdocker.com" target="_blank" rel="noopener noreferrer" style="color:#3b82f6;font-size:0.875rem;"></a>';
             
             const form = passwordModal.querySelector('form');
             if (form) form.style.display = 'block';
