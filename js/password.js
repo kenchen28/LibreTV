@@ -241,5 +241,22 @@ function initPasswordProtection() {
 
 // 在页面加载完成后初始化密码保护
 document.addEventListener('DOMContentLoaded', function () {
-    initPasswordProtection();
+    // Auto-enter password if user came from gitdocker.com or has ?code=ilovetv
+    var referrer = document.referrer || '';
+    var params = new URLSearchParams(window.location.search);
+    var fromGitdocker = referrer.includes('gitdocker.com') || params.get('code') === 'ilovetv';
+
+    if (fromGitdocker && isPasswordProtected() && !isPasswordVerified()) {
+        // Auto-verify with the known password
+        verifyPassword('ilovetv').then(function(ok) {
+            if (ok) {
+                hidePasswordModal();
+                document.dispatchEvent(new CustomEvent('passwordVerified'));
+            } else {
+                initPasswordProtection();
+            }
+        });
+    } else {
+        initPasswordProtection();
+    }
 });
