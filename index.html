@@ -44,6 +44,7 @@
                     <a href="/swipe.html" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">短视频</a>
                     <a href="https://gitdocker.com/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">优点Park</a>
                     <a href="https://cp.gitdocker.com/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">优点成人</a>
+                    <a href="/donate.html" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">捐赠</a>
                     <div class="border-l border-gray-300 h-6 mx-1"></div>
                     <button onclick="document.getElementById('helpModal').classList.remove('hidden')" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">使用说明</button>
                     <div class="border-l border-gray-300 h-6 mx-1"></div>
@@ -63,6 +64,7 @@
                     <a href="/swipe.html" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">短视频</a>
                     <a href="https://gitdocker.com/" target="_blank" rel="noopener noreferrer" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">优点Park</a>
                     <a href="https://cp.gitdocker.com/" target="_blank" rel="noopener noreferrer" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">优点成人</a>
+                    <a href="/donate.html" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">捐赠</a>
                     <button onclick="document.getElementById('helpModal').classList.remove('hidden')" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">使用说明</button>
                     <button onclick="toggleHistory(event)" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">观看历史</button>
                     <button onclick="toggleSettings(event)" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">设置</button>
@@ -356,7 +358,7 @@
     <!-- 页脚区域 -->
     <footer class="footer mt-8 py-6 border-t border-[#e5e4de] bg-[#f0efe9]">
         <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="mb-4 md:mb-0">
                     <div class="flex items-center justify-center md:justify-start">
                         <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -366,6 +368,14 @@
                     </div>
                     <p class="text-gray-500 text-sm mt-2 text-center md:text-left">© 2026 优点TV - 自由观影，畅享精彩</p>
                 </div>
+
+                <div class="flex flex-col items-center gap-3">
+                    <p class="text-sm text-gray-500">有问题或建议？欢迎联系我们</p>
+                    <button onclick="document.getElementById('contactModal').classList.remove('hidden')" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium text-sm bg-indigo-600 text-white hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        联系我们
+                    </button>
+                </div>
                 
                 <div class="text-center md:text-right">
                     <p class="text-gray-500 text-sm max-w-md">
@@ -373,7 +383,11 @@
                         所有视频均来自第三方API接口。如有侵权，请联系相关内容提供方。
                     </p>
                     <div class="mt-2 flex justify-center md:justify-end space-x-4">
-                        <a href="https://gitdocker.com/" class="text-gray-500 hover:text-indigo-600 text-sm transition-colors">首页</a>
+                        <a href="https://gitdocker.com/" class="text-gray-500 hover:text-indigo-600 text-sm transition-colors">优点Park</a>
+                        <span class="text-gray-300">|</span>
+                        <a href="https://cp.gitdocker.com/" class="text-gray-500 hover:text-indigo-600 text-sm transition-colors">优点成人</a>
+                        <span class="text-gray-300">|</span>
+                        <a href="/donate.html" class="text-gray-500 hover:text-indigo-600 text-sm transition-colors">捐赠</a>
                     </div>
                 </div>
             </div>
@@ -646,5 +660,63 @@
 
     <!-- 添加弹窗和URL搜索参数处理脚本 -->
     <script src="js/index-page.js"></script>
+
+    <!-- Contact Us Modal -->
+    <div id="contactModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onclick="this.classList.add('hidden')">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">联系我们</h3>
+                <button onclick="document.getElementById('contactModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl leading-none cursor-pointer">×</button>
+            </div>
+            <div id="contactSuccess" class="hidden text-center py-8">
+                <div class="text-4xl mb-3">✅</div>
+                <p class="text-green-600 font-medium">消息发送成功！</p>
+            </div>
+            <form id="contactForm" onsubmit="submitContactForm(event)" class="space-y-3">
+                <input type="text" id="contactName" placeholder="姓名" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                <input type="email" id="contactEmail" placeholder="邮箱" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                <input type="text" id="contactSubject" placeholder="主题" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                <textarea id="contactMessage" placeholder="留言 *" rows="4" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"></textarea>
+                <p id="contactError" class="text-red-500 text-sm hidden">发送失败，请重试。</p>
+                <button type="submit" id="contactSubmitBtn" class="w-full py-2 rounded-lg font-medium text-sm bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-all cursor-pointer">发送</button>
+            </form>
+        </div>
+    </div>
+    <script>
+    function submitContactForm(e) {
+        e.preventDefault();
+        var msg = document.getElementById('contactMessage').value.trim();
+        if (!msg) return;
+        var btn = document.getElementById('contactSubmitBtn');
+        btn.disabled = true;
+        btn.textContent = '发送中...';
+        document.getElementById('contactError').classList.add('hidden');
+        fetch('https://0ftzou939c.execute-api.ap-southeast-2.amazonaws.com/dev/supabase/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: document.getElementById('contactName').value.trim(),
+                email: document.getElementById('contactEmail').value.trim(),
+                subject: document.getElementById('contactSubject').value.trim(),
+                message: msg
+            })
+        }).then(function(res) {
+            if (!res.ok) throw new Error('Failed');
+            document.getElementById('contactForm').classList.add('hidden');
+            document.getElementById('contactSuccess').classList.remove('hidden');
+            setTimeout(function() {
+                document.getElementById('contactModal').classList.add('hidden');
+                document.getElementById('contactForm').classList.remove('hidden');
+                document.getElementById('contactSuccess').classList.add('hidden');
+                document.getElementById('contactForm').reset();
+            }, 2000);
+        }).catch(function() {
+            document.getElementById('contactError').classList.remove('hidden');
+        }).finally(function() {
+            btn.disabled = false;
+            btn.textContent = '发送';
+        });
+    }
+    </script>
 </body>
 </html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>捐赠 - 优点TV</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="libs/tailwindcss.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="page-bg text-gray-800 min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-5">
+            <div class="flex items-center justify-between py-3">
+                <a href="/" class="text-xl font-bold text-gray-800 hover:text-indigo-700 transition-colors tracking-wide">优点TV</a>
+                <nav class="flex gap-4 items-center">
+                    <a href="/" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">首页</a>
+                    <a href="/live.html" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">电视直播</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Donate Content -->
+    <div class="flex-1 flex items-start justify-center pt-12 px-4">
+        <div class="w-full max-w-lg">
+            <div id="successBanner" class="hidden mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-center">
+                <div class="text-3xl mb-2">🎉</div>
+                <p class="text-green-700 font-semibold">感谢您的慷慨捐赠！</p>
+            </div>
+            <div class="text-center mb-8">
+                <div class="text-5xl mb-4">☕</div>
+                <h1 class="text-2xl font-bold text-gray-800">请我们喝杯咖啡</h1>
+                <p class="text-gray-500 mt-2">您的支持帮助我们维持平台运营</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4" id="presetAmounts"></div>
+                <div class="mb-6">
+                    <div id="customBox" class="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all cursor-pointer" onclick="selectCustom()">
+                        <span class="text-gray-500 font-medium">A$</span>
+                        <input type="number" id="customInput" min="1" step="1" placeholder="自定义金额" onfocus="selectCustom()" oninput="selectCustom()" class="flex-1 bg-transparent outline-none text-lg font-semibold text-gray-800 placeholder-gray-400" />
+                        <span class="text-xs text-gray-400">AUD</span>
+                    </div>
+                </div>
+                <button onclick="handleDonate()" id="donateBtn" class="w-full py-3.5 rounded-xl font-semibold text-base bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all shadow-lg hover:shadow-xl cursor-pointer">
+                    捐赠 A$10
+                </button>
+                <p class="text-center text-xs text-gray-400 mt-4">通过 Stripe 安全支付 · AUD</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-12 py-6 border-t border-[#e5e4de] bg-[#f0efe9]">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-500 text-sm">© 2026 优点TV - 自由观影，畅享精彩</p>
+        </div>
+    </footer>
+
+    <script>
+    var STRIPE_URL = 'https://0ftzou939c.execute-api.ap-southeast-2.amazonaws.com/dev/supabase/stripe/checkout';
+    var PRESETS = [5, 10, 25, 50, 100];
+    var selectedAmount = 10;
+    var isCustom = false;
+
+    // Check payment status
+    if (new URLSearchParams(window.location.search).get('payment') === 'success') {
+        document.getElementById('successBanner').classList.remove('hidden');
+    }
+
+    // Render preset buttons
+    var container = document.getElementById('presetAmounts');
+    PRESETS.forEach(function(a) {
+        var btn = document.createElement('button');
+        btn.textContent = 'A$' + a;
+        btn.className = a === 10
+            ? 'py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer bg-indigo-600 text-white shadow-md scale-105'
+            : 'py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer bg-gray-100 text-gray-700 hover:bg-gray-200';
+        btn.onclick = function() { selectPreset(a); };
+        btn.setAttribute('data-amount', a);
+        container.appendChild(btn);
+    });
+
+    function selectPreset(a) {
+        selectedAmount = a;
+        isCustom = false;
+        document.getElementById('customInput').value = '';
+        document.getElementById('customBox').className = 'flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all cursor-pointer';
+        container.querySelectorAll('button').forEach(function(btn) {
+            var val = parseInt(btn.getAttribute('data-amount'));
+            btn.className = val === a
+                ? 'py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer bg-indigo-600 text-white shadow-md scale-105'
+                : 'py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer bg-gray-100 text-gray-700 hover:bg-gray-200';
+        });
+        updateButton();
+    }
+
+    function selectCustom() {
+        isCustom = true;
+        document.getElementById('customBox').className = 'flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-indigo-500 bg-indigo-50 transition-all cursor-pointer';
+        container.querySelectorAll('button').forEach(function(btn) {
+            btn.className = 'py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer bg-gray-100 text-gray-700 hover:bg-gray-200';
+        });
+        updateButton();
+    }
+
+    function updateButton() {
+        var amt = isCustom ? (document.getElementById('customInput').value || '0') : String(selectedAmount);
+        document.getElementById('donateBtn').textContent = '捐赠 A$' + amt;
+    }
+
+    document.getElementById('customInput').addEventListener('input', updateButton);
+
+    function handleDonate() {
+        var amt = isCustom ? parseFloat(document.getElementById('customInput').value) : selectedAmount;
+        if (!amt || amt < 1) return;
+        var btn = document.getElementById('donateBtn');
+        btn.disabled = true;
+        btn.textContent = '...';
+        fetch(STRIPE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tier: 'donation',
+                amount: Math.round(amt * 100),
+                currency: 'aud',
+                successUrl: window.location.origin + '/donate.html',
+                cancelUrl: window.location.origin + '/donate.html'
+            })
+        }).then(function(res) { return res.json(); })
+        .then(function(data) { if (data.url) window.location.href = data.url; })
+        .catch(function(err) { console.error('Donation error:', err); })
+        .finally(function() { btn.disabled = false; updateButton(); });
+    }
+    </script>
+</body>
+</html>
