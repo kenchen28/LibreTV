@@ -198,6 +198,11 @@ app.get('/api/music/:action', async (req, res) => {
       if (!match) return res.status(404).json({ error: 'Song data not found' });
       const jsonStr = match[1].replace(/\\u0022/g, '"').replace(/\\\//g, '/');
       const appData = JSON.parse(jsonStr);
+      // Extract LRC lyrics
+      const lrcMatch = html.match(/id="content-lrc">([\s\S]*?)<\/div>/);
+      if (lrcMatch) {
+        appData.lrc = lrcMatch[1].replace(/<br\s*\/?>/g, '\n').trim();
+      }
       return res.json({ code: 200, data: appData });
     }
 

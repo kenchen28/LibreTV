@@ -28,7 +28,10 @@ export async function onRequest(context) {
       const match = html.match(/window\.appData\s*=\s*JSON\.parse\('(.+?)'\)/);
       if (!match) return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: CORS });
       const jsonStr = match[1].replace(/\\u0022/g, '"').replace(/\\\//g, '/');
-      return new Response(JSON.stringify({ code: 200, data: JSON.parse(jsonStr) }), { headers: CORS });
+      const appData = JSON.parse(jsonStr);
+      const lrcMatch = html.match(/id="content-lrc">([\s\S]*?)<\/div>/);
+      if (lrcMatch) appData.lrc = lrcMatch[1].replace(/<br\s*\/?>/g, '\n').trim();
+      return new Response(JSON.stringify({ code: 200, data: appData }), { headers: CORS });
     }
     if (action === 'play-url') {
       const playId = url.searchParams.get('play_id');

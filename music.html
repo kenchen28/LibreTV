@@ -45,7 +45,7 @@
             </div>
         </div>
     </header>
-    <main class="max-w-5xl mx-auto px-4 py-6">
+    <main class="max-w-6xl mx-auto px-4 py-6">
         <div class="max-w-xl mx-auto mb-6">
             <div class="flex gap-2">
                 <input type="text" id="si" placeholder="搜索歌曲、歌手..." class="flex-1 bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" onkeydown="if(event.key==='Enter')doSearch()">
@@ -67,13 +67,33 @@
             <button onclick="showTab('playlist')" id="tP" class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600">📋 播放列表 <span id="pc">(0)</span></button>
         </div>
         <div id="loading" class="hidden text-center py-12"><div class="inline-block w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div><p class="mt-3 text-gray-500 text-sm">搜索中...</p></div>
-        <div id="rP"><div id="res" class="space-y-2"></div></div>
-        <div id="pP" class="hidden">
-            <div class="flex justify-between items-center mb-3"><span class="text-sm text-gray-500">已保存 <span id="pc2">0</span> 首</span><button onclick="clearPL()" class="text-xs text-red-500 hover:text-red-700">清空</button></div>
-            <div id="plItems" class="space-y-1"></div>
-            <div id="ePL" class="text-center py-16 text-gray-400"><div class="text-5xl mb-3">📋</div><p>播放列表为空，点击 ❤️ 添加歌曲</p></div>
+
+        <!-- Two column layout: content left, lyrics right -->
+        <div class="flex flex-col lg:flex-row gap-4">
+            <!-- Left: results / playlist -->
+            <div class="flex-1 min-w-0">
+                <div id="rP"><div id="res" class="space-y-2"></div></div>
+                <div id="pP" class="hidden">
+                    <div class="flex justify-between items-center mb-3"><span class="text-sm text-gray-500">已保存 <span id="pc2">0</span> 首</span><button onclick="clearPL()" class="text-xs text-red-500 hover:text-red-700">清空</button></div>
+                    <div id="plItems" class="space-y-1"></div>
+                    <div id="ePL" class="text-center py-16 text-gray-400"><div class="text-5xl mb-3">📋</div><p>播放列表为空，点击 ❤️ 添加歌曲</p></div>
+                </div>
+                <div id="defMsg" class="text-center py-16"><div class="text-6xl mb-4">🎶</div><p class="text-gray-400">搜索你喜欢的音乐，支持完整播放</p></div>
+            </div>
+
+            <!-- Right: lyrics -->
+            <div id="lrcPanel" class="hidden lg:w-80 flex-shrink-0">
+                <div class="border border-gray-200 rounded-lg bg-white overflow-hidden sticky top-16">
+                    <div class="flex items-center justify-between px-4 py-2 border-b border-gray-100 bg-gray-50/80">
+                        <span class="text-sm font-medium text-gray-700">🎤 歌词</span>
+                        <button onclick="document.getElementById('lrcPanel').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+                    </div>
+                    <div id="lrcBox" class="h-[28rem] overflow-y-auto px-4 py-3" style="scroll-behavior:smooth">
+                        <div id="lrcContent" class="space-y-1 text-center text-sm text-gray-500"></div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="defMsg" class="text-center py-16"><div class="text-6xl mb-4">🎶</div><p class="text-gray-400">搜索你喜欢的音乐，支持完整播放</p></div>
     </main>
 
     <!-- Player Bar -->
@@ -163,6 +183,8 @@
             if(dd.code!==200||!dd.data)throw new Error('Detail failed');
             const appData=dd.data;
             if(appData.mp3_cover)document.getElementById('pArt').src=appData.mp3_cover;
+            // Show lyrics
+            showLyrics(appData.lrc || '');
             // Step 2: get play URL
             const pr=await fetch('/api/music/play-url?play_id='+encodeURIComponent(appData.play_id));
             const pd=await pr.json();
@@ -225,6 +247,60 @@
         if(t==='playlist')renderPL();
     }
     upc();
+    // Lyrics
+    let lrcLines = []; // [{time: seconds, text: string}]
+    let curLrcIdx = -1;
+
+    function parseLRC(lrc) {
+        if (!lrc) return [];
+        const lines = lrc.split('\n');
+        const parsed = [];
+        for (const line of lines) {
+            const m = line.match(/\[(\d{2}):(\d{2})\.(\d{1,3})\](.*)/);
+            if (m) {
+                const time = parseInt(m[1]) * 60 + parseInt(m[2]) + parseInt(m[3]) / (m[3].length === 3 ? 1000 : (m[3].length === 2 ? 100 : 10));
+                const text = m[4].trim();
+                if (text) parsed.push({ time, text });
+            }
+        }
+        return parsed.sort((a, b) => a.time - b.time);
+    }
+
+    function showLyrics(lrc) {
+        lrcLines = parseLRC(lrc);
+        curLrcIdx = -1;
+        const panel = document.getElementById('lrcPanel');
+        const content = document.getElementById('lrcContent');
+        if (!lrcLines.length) { panel.classList.add('hidden'); return; }
+        panel.classList.remove('hidden');
+        content.innerHTML = lrcLines.map((l, i) => `<p id="lrc-${i}" class="py-1 transition-all duration-300 text-gray-400 text-sm">${esc(l.text)}</p>`).join('');
+    }
+
+    function syncLyrics() {
+        if (!lrcLines.length) return;
+        const t = au.currentTime;
+        let idx = -1;
+        for (let i = lrcLines.length - 1; i >= 0; i--) {
+            if (t >= lrcLines[i].time) { idx = i; break; }
+        }
+        if (idx === curLrcIdx) return;
+        curLrcIdx = idx;
+        const content = document.getElementById('lrcContent');
+        const children = content.children;
+        for (let i = 0; i < children.length; i++) {
+            if (i === idx) {
+                children[i].className = 'py-1 transition-all duration-300 text-indigo-600 font-semibold text-base';
+            } else {
+                children[i].className = 'py-1 transition-all duration-300 text-gray-400 text-sm';
+            }
+        }
+        if (idx >= 0) {
+            const el = document.getElementById('lrc-' + idx);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    au.addEventListener('timeupdate', syncLyrics);
     </script>
 </body>
 </html>

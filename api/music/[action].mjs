@@ -26,7 +26,10 @@ export default async function handler(req, res) {
       const match = html.match(/window\.appData\s*=\s*JSON\.parse\('(.+?)'\)/);
       if (!match) return res.status(404).json({ error: 'Not found' });
       const jsonStr = match[1].replace(/\\u0022/g, '"').replace(/\\\//g, '/');
-      return res.json({ code: 200, data: JSON.parse(jsonStr) });
+      const appData = JSON.parse(jsonStr);
+      const lrcMatch = html.match(/id="content-lrc">([\s\S]*?)<\/div>/);
+      if (lrcMatch) appData.lrc = lrcMatch[1].replace(/<br\s*\/?>/g, '\n').trim();
+      return res.json({ code: 200, data: appData });
     }
     if (action === 'play-url') {
       const playId = req.query.play_id;
