@@ -65,7 +65,7 @@ async function renderPage(filePath, password) {
   return content;
 }
 
-app.get(['/', '/index.html', '/player.html', '/live.html', '/swipe.html'], async (req, res) => {
+app.get(['/', '/index.html', '/player.html', '/live.html', '/swipe.html', '/music.html'], async (req, res) => {
   try {
     let filePath;
     switch (req.path) {
@@ -77,6 +77,9 @@ app.get(['/', '/index.html', '/player.html', '/live.html', '/swipe.html'], async
         break;
       case '/swipe.html':
         filePath = path.join(__dirname, 'swipe.html');
+        break;
+      case '/music.html':
+        filePath = path.join(__dirname, 'music.html');
         break;
       default: // '/' 和 '/index.html'
         filePath = path.join(__dirname, 'index.html');
@@ -159,6 +162,61 @@ function validateProxyAuth(req) {
   
   return true;
 }
+
+app.get('/api/music/:action', async (req, res) => {
+  try {
+    const { action } = req.params;
+    const ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36';
+    const base = 'https://www.gequbao.com';
+
+    if (action === 'search') {
+      const q = req.query.q;
+      if (!q) return res.status(400).json({ error: 'Missing q param' });
+      const resp = await axios.get(`${base}/s/${encodeURIComponent(q)}`, { timeout: 10000, headers: { 'User-Agent': ua } });
+      const html = resp.data;
+      // Parse search results: extract /music/{id} and title="歌名 - 歌手"
+      const regex = /href="\/music\/(\d+)"[^>]*title="([^"]+)"/g;
+      const results = [];
+      const seen = new Set();
+      let m;
+      while ((m = regex.exec(html)) !== null) {
+        if (seen.has(m[1])) continue;
+        seen.add(m[1]);
+        const parts = m[2].split(' - ');
+        results.push({ id: m[1], title: parts[0] || m[2], artist: parts[1] || '' });
+      }
+      return res.json({ code: 200, data: results });
+    }
+
+    if (action === 'detail') {
+      const id = req.query.id;
+      if (!id) return res.status(400).json({ error: 'Missing id' });
+      const resp = await axios.get(`${base}/music/${id}`, { timeout: 10000, headers: { 'User-Agent': ua } });
+      const html = resp.data;
+      // Extract window.appData JSON
+      const match = html.match(/window\.appData\s*=\s*JSON\.parse\('(.+?)'\)/);
+      if (!match) return res.status(404).json({ error: 'Song data not found' });
+      const jsonStr = match[1].replace(/\\u0022/g, '"').replace(/\\\//g, '/');
+      const appData = JSON.parse(jsonStr);
+      return res.json({ code: 200, data: appData });
+    }
+
+    if (action === 'play-url') {
+      const playId = req.query.play_id || req.body?.play_id;
+      if (!playId) return res.status(400).json({ error: 'Missing play_id' });
+      const resp = await axios.post(`${base}/api/play-url`, `id=${encodeURIComponent(playId)}`, {
+        timeout: 10000,
+        headers: { 'User-Agent': ua, 'Referer': base, 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+      return res.json(resp.data);
+    }
+
+    return res.status(400).json({ error: 'Invalid action' });
+  } catch (error) {
+    console.error('Music API error:', error.message);
+    res.status(500).json({ error: 'Music API request failed' });
+  }
+});
 
 app.get('/proxy/:encodedUrl', async (req, res) => {
   try {

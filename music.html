@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优点TV - 音乐</title>
+    <meta name="description" content="免费在线音乐搜索与播放">
+    <link rel="icon" href="favicon.ico">
+    <script src="libs/tailwindcss.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .mc{transition:all .2s;cursor:pointer}.mc:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(0,0,0,.1)}
+        .now-playing{border-color:#4f46e5!important;background:linear-gradient(135deg,#eef2ff,#e0e7ff)!important}
+        .eq{display:flex;align-items:flex-end;gap:2px;height:14px}.eq span{width:3px;background:#4f46e5;border-radius:1px;animation:eqA .6s ease-in-out infinite alternate}
+        .eq span:nth-child(2){animation-delay:.15s}.eq span:nth-child(3){animation-delay:.3s}.eq span:nth-child(4){animation-delay:.1s}
+        @keyframes eqA{0%{height:3px}100%{height:14px}}
+        .vol{-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:#e5e4de;outline:none}
+        .vol::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#4f46e5;cursor:pointer}
+        .pli{transition:all .15s}.pli:hover{background:#f0efe9}
+        .tab-btn.active{background:#4f46e5;color:#fff}
+    </style>
+</head>
+<body class="page-bg text-gray-800 pb-28">
+    <header class="bg-white border-b border-gray-200 shadow-sm relative z-20">
+        <div class="max-w-7xl mx-auto px-5">
+            <div class="flex items-center justify-between py-3">
+                <a href="/" class="text-xl font-bold text-gray-800 hover:text-indigo-700 transition-colors">优点TV</a>
+                <nav class="hidden md:flex gap-4 items-center">
+                    <a href="/" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">视频搜索</a>
+                    <a href="/live.html" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">电视直播</a>
+                    <a href="/music.html" class="px-3 py-1.5 rounded-md font-medium text-sm bg-indigo-600 text-white rounded-md">音乐</a>
+                    <a href="/swipe.html" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">短视频</a>
+                </nav>
+                <button onclick="document.getElementById('mobNav').classList.toggle('hidden')" class="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+            </div>
+            <div id="mobNav" class="md:hidden hidden pb-4">
+                <div class="flex flex-col gap-2 pt-2 border-t border-gray-200">
+                    <a href="/" class="px-4 py-2.5 rounded-md text-sm text-gray-500 hover:bg-gray-100 text-center">视频搜索</a>
+                    <a href="/live.html" class="px-4 py-2.5 rounded-md text-sm text-gray-500 hover:bg-gray-100 text-center">电视直播</a>
+                    <a href="/music.html" class="px-4 py-2.5 rounded-md text-sm bg-indigo-600 text-white text-center rounded-md">音乐</a>
+                    <a href="/swipe.html" class="px-4 py-2.5 rounded-md text-sm text-gray-500 hover:bg-gray-100 text-center">短视频</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="max-w-5xl mx-auto px-4 py-6">
+        <div class="max-w-xl mx-auto mb-6">
+            <div class="flex gap-2">
+                <input type="text" id="si" placeholder="搜索歌曲、歌手..." class="flex-1 bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" onkeydown="if(event.key==='Enter')doSearch()">
+                <button onclick="doSearch()" class="px-6 py-3 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">搜索</button>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-3">
+                <button onclick="qs('周杰伦')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">周杰伦</button>
+                <button onclick="qs('Taylor Swift')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">Taylor Swift</button>
+                <button onclick="qs('薛之谦')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">薛之谦</button>
+                <button onclick="qs('邓紫棋')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">邓紫棋</button>
+                <button onclick="qs('林俊杰')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">林俊杰</button>
+                <button onclick="qs('Adele')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">Adele</button>
+                <button onclick="qs('陈奕迅')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">陈奕迅</button>
+                <button onclick="qs('刘德华')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">刘德华</button>
+            </div>
+        </div>
+        <div class="flex gap-2 mb-4">
+            <button onclick="showTab('results')" id="tR" class="tab-btn active px-4 py-1.5 rounded-full text-sm font-medium">🎵 搜索结果</button>
+            <button onclick="showTab('playlist')" id="tP" class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600">📋 播放列表 <span id="pc">(0)</span></button>
+        </div>
+        <div id="loading" class="hidden text-center py-12"><div class="inline-block w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div><p class="mt-3 text-gray-500 text-sm">搜索中...</p></div>
+        <div id="rP"><div id="res" class="space-y-2"></div></div>
+        <div id="pP" class="hidden">
+            <div class="flex justify-between items-center mb-3"><span class="text-sm text-gray-500">已保存 <span id="pc2">0</span> 首</span><button onclick="clearPL()" class="text-xs text-red-500 hover:text-red-700">清空</button></div>
+            <div id="plItems" class="space-y-1"></div>
+            <div id="ePL" class="text-center py-16 text-gray-400"><div class="text-5xl mb-3">📋</div><p>播放列表为空，点击 ❤️ 添加歌曲</p></div>
+        </div>
+        <div id="defMsg" class="text-center py-16"><div class="text-6xl mb-4">🎶</div><p class="text-gray-400">搜索你喜欢的音乐，支持完整播放</p></div>
+    </main>
+
+    <!-- Player Bar -->
+    <div id="pBar" class="fixed bottom-0 left-0 right-0 border-t border-gray-200 shadow-lg z-50 hidden" style="backdrop-filter:blur(20px);background:rgba(245,244,238,.95)">
+        <div class="h-1.5 bg-gray-200 cursor-pointer" onclick="seek(event)"><div id="pF" class="h-full bg-indigo-500 rounded-r-full" style="width:0%;transition:width .1s linear"></div></div>
+        <div class="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-3">
+            <img id="pArt" src="" class="w-11 h-11 rounded-lg object-cover bg-indigo-100 flex-shrink-0" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect fill=%22%23e0e7ff%22 width=%2240%22 height=%2240%22/><text x=%2220%22 y=%2226%22 text-anchor=%22middle%22 font-size=%2220%22>🎵</text></svg>'">
+            <div class="min-w-0 flex-1"><div id="pT" class="text-sm font-medium truncate">未播放</div><div id="pA" class="text-xs text-gray-500 truncate">-</div></div>
+            <div class="flex items-center gap-2">
+                <button onclick="prev()" class="p-1.5 hover:bg-gray-100 rounded-full"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+                <button onclick="toggle()" class="p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700">
+                    <svg id="iP" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="iPa" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <button onclick="next()" class="p-1.5 hover:bg-gray-100 rounded-full"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500">
+                <span id="cT">0:00</span>/<span id="dT">0:00</span>
+                <input type="range" class="vol w-16" min="0" max="100" value="80" oninput="au.volume=this.value/100">
+            </div>
+        </div>
+    </div>
+    <audio id="au" preload="auto"></audio>
+
+    <script>
+    const au = document.getElementById('au');
+    let tracks = [], curIdx = -1;
+    let pl = JSON.parse(localStorage.getItem('musicPL') || '[]');
+
+    function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+    function fmt(s){if(!s)return'-';if(typeof s==='string')return s;const m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+String(sec).padStart(2,'0')}
+    function qs(q){document.getElementById('si').value=q;doSearch()}
+    function upc(){document.getElementById('pc').textContent='('+pl.length+')';document.getElementById('pc2').textContent=pl.length}
+    function inPL(id){return pl.some(t=>t.id===id)}
+    function ub(p){document.getElementById('iP').classList.toggle('hidden',p);document.getElementById('iPa').classList.toggle('hidden',!p)}
+
+    async function doSearch(){
+        const q=document.getElementById('si').value.trim();
+        if(!q)return;
+        showTab('results');
+        document.getElementById('defMsg').classList.add('hidden');
+        document.getElementById('loading').classList.remove('hidden');
+        document.getElementById('res').innerHTML='';
+        try{
+            const r=await fetch('/api/music/search?q='+encodeURIComponent(q));
+            const d=await r.json();
+            tracks=d.data||[];
+            document.getElementById('loading').classList.add('hidden');
+            if(!tracks.length){document.getElementById('res').innerHTML='<div class="text-center py-16 text-gray-400"><div class="text-5xl mb-3">😔</div><p>没有找到结果</p></div>';return}
+            renderTracks();
+        }catch(e){
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('res').innerHTML='<div class="text-center py-16 text-gray-400"><p>搜索失败: '+esc(e.message)+'</p></div>';
+        }
+    }
+
+    function renderTracks(){
+        document.getElementById('res').innerHTML=tracks.map((t,i)=>`
+            <div class="mc border border-gray-200 rounded-lg p-3 bg-white ${curIdx===i?'now-playing':''}" onclick="playSong(${i})">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-lg flex-shrink-0">
+                        ${curIdx===i?'<div class="eq"><span></span><span></span><span></span><span></span></div>':'🎵'}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="text-sm font-medium truncate">${esc(t.title)}</div>
+                        <div class="text-xs text-gray-500 truncate">${esc(t.artist)}</div>
+                    </div>
+                    <button onclick="event.stopPropagation();tglPL(${i})" class="p-1.5 rounded-full hover:bg-gray-100 text-lg">${inPL(t.id)?'❤️':'🤍'}</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function playSong(i){
+        if(i<0||i>=tracks.length)return;
+        curIdx=i;
+        const t=tracks[i];
+        document.getElementById('pBar').classList.remove('hidden');
+        document.getElementById('pT').textContent=t.title;
+        document.getElementById('pA').textContent=t.artist;
+        document.getElementById('pArt').src=t.cover||'';
+        renderTracks();
+        // Step 1: get detail (play_id + cover)
+        try{
+            const dr=await fetch('/api/music/detail?id='+t.id);
+            const dd=await dr.json();
+            if(dd.code!==200||!dd.data)throw new Error('Detail failed');
+            const appData=dd.data;
+            if(appData.mp3_cover)document.getElementById('pArt').src=appData.mp3_cover;
+            // Step 2: get play URL
+            const pr=await fetch('/api/music/play-url?play_id='+encodeURIComponent(appData.play_id));
+            const pd=await pr.json();
+            if(pd.code!==1||!pd.data?.url)throw new Error('Play URL failed');
+            au.src=pd.data.url;
+            au.volume=document.querySelector('.vol')?.value/100||0.8;
+            au.play().catch(()=>{});
+            ub(true);
+        }catch(e){
+            console.error('Play error:',e);
+            document.getElementById('pT').textContent='播放失败: '+t.title;
+            ub(false);
+        }
+    }
+
+    function toggle(){au.paused?(au.play(),ub(true)):(au.pause(),ub(false))}
+    function next(){if(curIdx<tracks.length-1)playSong(curIdx+1)}
+    function prev(){if(curIdx>0)playSong(curIdx-1)}
+    function seek(e){if(!au.duration)return;const r=e.currentTarget.getBoundingClientRect();au.currentTime=(e.clientX-r.left)/r.width*au.duration}
+
+    au.addEventListener('timeupdate',()=>{if(!au.duration)return;document.getElementById('pF').style.width=(au.currentTime/au.duration*100)+'%';document.getElementById('cT').textContent=fmt(au.currentTime);document.getElementById('dT').textContent=fmt(au.duration)});
+    au.addEventListener('ended',()=>{ub(false);next()});
+    au.addEventListener('pause',()=>ub(false));
+    au.addEventListener('play',()=>ub(true));
+
+    // Playlist
+    function tglPL(i){
+        const t=tracks[i];
+        if(inPL(t.id)){pl=pl.filter(x=>x.id!==t.id)}
+        else{pl.push({id:t.id,title:t.title,artist:t.artist,cover:t.cover||''})}
+        localStorage.setItem('musicPL',JSON.stringify(pl));
+        upc();renderTracks();renderPL();
+    }
+    function clearPL(){pl=[];localStorage.removeItem('musicPL');upc();renderPL()}
+    function removePLi(i){pl.splice(i,1);localStorage.setItem('musicPL',JSON.stringify(pl));upc();renderPL()}
+    function renderPL(){
+        if(!pl.length){document.getElementById('plItems').innerHTML='';document.getElementById('ePL').classList.remove('hidden');return}
+        document.getElementById('ePL').classList.add('hidden');
+        document.getElementById('plItems').innerHTML=pl.map((t,i)=>`
+            <div class="pli flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer" onclick="playFromPL(${i})">
+                <div class="w-8 h-8 rounded bg-indigo-100 flex items-center justify-center text-sm flex-shrink-0">🎵</div>
+                <div class="min-w-0 flex-1"><div class="text-sm font-medium truncate">${esc(t.title)}</div><div class="text-xs text-gray-500 truncate">${esc(t.artist)}</div></div>
+                <button onclick="event.stopPropagation();removePLi(${i})" class="p-1 text-gray-400 hover:text-red-500">✕</button>
+            </div>
+        `).join('');
+    }
+    function playFromPL(i){
+        tracks=pl.map(x=>({id:x.id,title:x.title,artist:x.artist,cover:x.cover||''}));
+        curIdx=i;playSong(i);
+    }
+    function showTab(t){
+        document.getElementById('rP').classList.toggle('hidden',t!=='results');
+        document.getElementById('pP').classList.toggle('hidden',t!=='playlist');
+        document.getElementById('tR').classList.toggle('active',t==='results');
+        document.getElementById('tP').classList.toggle('active',t==='playlist');
+        document.getElementById('tR').classList.toggle('bg-gray-100',t!=='results');
+        document.getElementById('tR').classList.toggle('text-gray-600',t!=='results');
+        document.getElementById('tP').classList.toggle('bg-gray-100',t!=='playlist');
+        document.getElementById('tP').classList.toggle('text-gray-600',t!=='playlist');
+        if(t==='playlist')renderPL();
+    }
+    upc();
+    </script>
+</body>
+</html>
