@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优点TV - 小说/Books</title>
+    <meta name="description" content="免费在线小说阅读与搜索">
+    <link rel="icon" href="favicon.ico">
+    <script src="libs/tailwindcss.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .bc{transition:all .2s;cursor:pointer}.bc:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+        .tab-btn.active{background:#4f46e5;color:#fff}
+        .book-iframe{border:none;width:100%;height:calc(100vh - 8rem);border-radius:8px}
+    </style>
+</head>
+<body class="page-bg text-gray-800">
+    <header class="bg-white border-b border-gray-200 shadow-sm relative z-20">
+        <div class="max-w-7xl mx-auto px-5">
+            <div class="flex items-center justify-between py-3">
+                <a href="/" class="text-xl font-bold text-gray-800 hover:text-indigo-700 transition-colors">优点TV</a>
+                <nav class="hidden md:flex gap-4 items-center">
+                    <a href="/" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">视频搜索</a>
+                    <a href="/live.html" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">电视直播</a>
+                    <a href="/music.html" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">音乐</a>
+                    <a href="/books.html" class="px-3 py-1.5 rounded-md font-medium text-sm bg-indigo-600 text-white rounded-md">小说</a>
+                    <a href="/swipe.html" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">短视频</a>
+                </nav>
+                <button onclick="document.getElementById('mobNav').classList.toggle('hidden')" class="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+            </div>
+            <div id="mobNav" class="md:hidden hidden pb-4">
+                <div class="flex flex-col gap-2 pt-2 border-t border-gray-200">
+                    <a href="/" class="px-4 py-2.5 rounded-md text-sm text-gray-500 hover:bg-gray-100 text-center">视频搜索</a>
+                    <a href="/music.html" class="px-4 py-2.5 rounded-md text-sm text-gray-500 hover:bg-gray-100 text-center">音乐</a>
+                    <a href="/books.html" class="px-4 py-2.5 rounded-md text-sm bg-indigo-600 text-white text-center rounded-md">小说</a>
+                    <a href="/swipe.html" class="px-4 py-2.5 rounded-md text-sm text-gray-500 hover:bg-gray-100 text-center">短视频</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6">
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-6 justify-center">
+            <button onclick="showTab('chinese')" id="tCN" class="tab-btn active px-5 py-2 rounded-full text-sm font-medium">📚 中文小说</button>
+            <button onclick="showTab('english')" id="tEN" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600">📖 English Books</button>
+        </div>
+
+        <!-- Chinese novels (iframe) -->
+        <div id="cnPanel">
+            <div class="text-center mb-4">
+                <p class="text-gray-500 text-sm mb-3">浏览和阅读中文小说 — 由和图书提供</p>
+                <div class="flex gap-2 justify-center flex-wrap">
+                    <button onclick="loadSite('https://www.hetushu.com/')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">🏠 首页</button>
+                    <button onclick="loadSite('https://www.hetushu.com/book/index.html')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">📚 书库</button>
+                    <button onclick="loadSite('https://www.hetushu.com/list/1_1.html')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">🔥 玄幻</button>
+                    <button onclick="loadSite('https://www.hetushu.com/list/2_1.html')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">⚔️ 武侠</button>
+                    <button onclick="loadSite('https://www.hetushu.com/list/3_1.html')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">🏙️ 都市</button>
+                    <button onclick="loadSite('https://www.hetushu.com/list/6_1.html')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">📜 历史</button>
+                    <button onclick="loadSite('https://www.hetushu.com/list/8_1.html')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">🔬 科幻</button>
+                </div>
+            </div>
+            <iframe id="bookFrame" src="https://www.hetushu.com/" class="book-iframe" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" title="中文小说"></iframe>
+        </div>
+
+        <!-- English books (Open Library search) -->
+        <div id="enPanel" class="hidden">
+            <div class="max-w-xl mx-auto mb-6">
+                <div class="flex gap-2">
+                    <input type="text" id="bsi" placeholder="Search books..." class="flex-1 bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" onkeydown="if(event.key==='Enter')searchBooks()">
+                    <button onclick="searchBooks()" class="px-6 py-3 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">Search</button>
+                </div>
+                <div class="flex flex-wrap gap-2 mt-3">
+                    <button onclick="qsb('harry potter')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">Harry Potter</button>
+                    <button onclick="qsb('lord of the rings')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">Lord of the Rings</button>
+                    <button onclick="qsb('三体')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">三体</button>
+                    <button onclick="qsb('stephen king')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">Stephen King</button>
+                    <button onclick="qsb('science fiction')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">Sci-Fi</button>
+                </div>
+            </div>
+            <div id="bLoading" class="hidden text-center py-12"><div class="inline-block w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div></div>
+            <div id="bResults" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+            <div id="bDefault" class="text-center py-16"><div class="text-6xl mb-4">📖</div><p class="text-gray-400">Search for books to explore</p></div>
+        </div>
+    </main>
+
+    <script>
+    function loadSite(url) { document.getElementById('bookFrame').src = url; }
+
+    function showTab(t) {
+        document.getElementById('cnPanel').classList.toggle('hidden', t !== 'chinese');
+        document.getElementById('enPanel').classList.toggle('hidden', t !== 'english');
+        document.getElementById('tCN').classList.toggle('active', t === 'chinese');
+        document.getElementById('tEN').classList.toggle('active', t === 'english');
+        document.getElementById('tCN').classList.toggle('bg-gray-100', t !== 'chinese');
+        document.getElementById('tCN').classList.toggle('text-gray-600', t !== 'chinese');
+        document.getElementById('tEN').classList.toggle('bg-gray-100', t !== 'english');
+        document.getElementById('tEN').classList.toggle('text-gray-600', t !== 'english');
+    }
+
+    function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function qsb(q) { document.getElementById('bsi').value = q; searchBooks(); }
+
+    async function searchBooks() {
+        const q = document.getElementById('bsi').value.trim();
+        if (!q || q.length < 3) return;
+        document.getElementById('bDefault').classList.add('hidden');
+        document.getElementById('bLoading').classList.remove('hidden');
+        document.getElementById('bResults').innerHTML = '';
+        try {
+            const r = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=20&fields=key,title,author_name,cover_i,first_publish_year,subject`);
+            const d = await r.json();
+            const books = d.docs || [];
+            document.getElementById('bLoading').classList.add('hidden');
+            if (!books.length) {
+                document.getElementById('bResults').innerHTML = '<div class="col-span-full text-center py-16 text-gray-400"><div class="text-5xl mb-3">😔</div><p>No books found</p></div>';
+                return;
+            }
+            document.getElementById('bResults').innerHTML = books.map(b => {
+                const cover = b.cover_i ? `https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg` : '';
+                const author = (b.author_name || []).slice(0, 2).join(', ') || 'Unknown';
+                const year = b.first_publish_year || '';
+                const olUrl = `https://openlibrary.org${b.key}`;
+                return `
+                    <a href="${olUrl}" target="_blank" rel="noopener noreferrer" class="bc border border-gray-200 rounded-lg bg-white overflow-hidden block">
+                        <div class="aspect-[2/3] bg-gray-100 flex items-center justify-center overflow-hidden">
+                            ${cover ? `<img src="${esc(cover)}" alt="" class="w-full h-full object-cover" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\\'text-4xl\\'>📖</span>'">` : '<span class="text-4xl">📖</span>'}
+                        </div>
+                        <div class="p-2">
+                            <div class="text-xs font-medium truncate">${esc(b.title)}</div>
+                            <div class="text-[10px] text-gray-500 truncate">${esc(author)}${year ? ' · ' + year : ''}</div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        } catch (e) {
+            document.getElementById('bLoading').classList.add('hidden');
+            document.getElementById('bResults').innerHTML = '<div class="col-span-full text-center py-16 text-gray-400"><p>Search failed</p></div>';
+        }
+    }
+
+    // Load trending books on init
+    qsb('bestseller fiction');
+    </script>
+</body>
+</html>

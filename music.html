@@ -1,1546 +1,234 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>优点TV - 音乐</title>
-    <meta name="description" content="免费在线音乐搜索与播放" />
-    <link rel="icon" href="favicon.ico" />
+    <meta name="description" content="免费在线音乐搜索与播放">
+    <link rel="icon" href="favicon.ico">
     <script src="libs/tailwindcss.min.js"></script>
-    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/styles.css">
     <style>
-      .mc {
-        transition: all 0.2s;
-        cursor: pointer;
-      }
-      .mc:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      }
-      .now-playing {
-        border-color: #4f46e5 !important;
-        background: linear-gradient(135deg, #eef2ff, #e0e7ff) !important;
-      }
-      .eq {
-        display: flex;
-        align-items: flex-end;
-        gap: 2px;
-        height: 14px;
-      }
-      .eq span {
-        width: 3px;
-        background: #4f46e5;
-        border-radius: 1px;
-        animation: eqA 0.6s ease-in-out infinite alternate;
-      }
-      .eq span:nth-child(2) {
-        animation-delay: 0.15s;
-      }
-      .eq span:nth-child(3) {
-        animation-delay: 0.3s;
-      }
-      .eq span:nth-child(4) {
-        animation-delay: 0.1s;
-      }
-      @keyframes eqA {
-        0% {
-          height: 3px;
-        }
-        100% {
-          height: 14px;
-        }
-      }
-      .vol {
-        -webkit-appearance: none;
-        appearance: none;
-        height: 4px;
-        border-radius: 2px;
-        background: #e5e4de;
-        outline: none;
-      }
-      .vol::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: #4f46e5;
-        cursor: pointer;
-      }
-      .pli {
-        transition: all 0.15s;
-      }
-      .pli:hover {
-        background: #f0efe9;
-      }
-      .tab-btn.active {
-        background: #4f46e5;
-        color: #fff;
-      }
+        .mc{transition:all .2s;cursor:pointer}.mc:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(0,0,0,.1)}
+        .now-playing{border-color:#4f46e5!important;background:linear-gradient(135deg,#eef2ff,#e0e7ff)!important}
+        .eq{display:flex;align-items:flex-end;gap:2px;height:14px}.eq span{width:3px;background:#4f46e5;border-radius:1px;animation:eqA .6s ease-in-out infinite alternate}
+        .eq span:nth-child(2){animation-delay:.15s}.eq span:nth-child(3){animation-delay:.3s}.eq span:nth-child(4){animation-delay:.1s}
+        @keyframes eqA{0%{height:3px}100%{height:14px}}
+        .vol{-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:#e5e4de;outline:none}
+        .vol::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#4f46e5;cursor:pointer}
+        .tab-btn.active{background:#4f46e5;color:#fff}
     </style>
-  </head>
-  <body class="page-bg text-gray-800 pb-28">
+</head>
+<body class="page-bg text-gray-800 pb-28">
     <header class="bg-white border-b border-gray-200 shadow-sm relative z-20">
-      <div class="max-w-7xl mx-auto px-5">
-        <div class="flex items-center justify-between py-3">
-          <a
-            href="/"
-            class="text-xl font-bold text-gray-800 hover:text-indigo-700 transition-colors"
-            >优点TV</a
-          >
-          <nav class="hidden md:flex gap-4 items-center">
-            <a
-              href="/"
-              class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-              >视频搜索</a
-            >
-            <a
-              href="/live.html"
-              class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-              >电视直播</a
-            >
-            <a
-              href="/music.html"
-              class="px-3 py-1.5 rounded-md font-medium text-sm bg-indigo-600 text-white rounded-md"
-              >音乐</a
-            >
-            <a
-              href="/swipe.html"
-              class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-              >短视频</a
-            >
-          </nav>
-          <button
-            onclick="
-              document.getElementById('mobNav').classList.toggle('hidden')
-            "
-            class="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100"
-          >
-            <svg
-              class="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
+        <div class="max-w-7xl mx-auto px-5">
+            <div class="flex items-center justify-between py-3">
+                <a href="/" class="text-xl font-bold text-gray-800 hover:text-indigo-700 transition-colors">优点TV</a>
+                <nav class="hidden md:flex gap-4 items-center">
+                    <a href="/" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">视频搜索</a>
+                    <a href="/live.html" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">电视直播</a>
+                    <a href="/music.html" class="px-3 py-1.5 rounded-md font-medium text-sm bg-indigo-600 text-white rounded-md">音乐</a>
+                    <a href="/books.html" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">小说</a>
+                    <a href="/swipe.html" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">短视频</a>
+                </nav>
+                <button onclick="document.getElementById('mobNav').classList.toggle('hidden')" class="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+            </div>
+            <div id="mobNav" class="md:hidden hidden pb-4">
+                <div class="flex flex-col gap-2 pt-2 border-t border-gray-200">
+                    <a href="/" class="px-4 py-2.5 rounded-md text-sm text-gray-500 hover:bg-gray-100 text-center">视频搜索</a>
+                    <a href="/music.html" class="px-4 py-2.5 rounded-md text-sm bg-indigo-600 text-white text-center rounded-md">音乐</a>
+                    <a href="/books.html" class="px-4 py-2.5 rounded-md text-sm text-gray-500 hover:bg-gray-100 text-center">小说</a>
+                    <a href="/swipe.html" class="px-4 py-2.5 rounded-md text-sm text-gray-500 hover:bg-gray-100 text-center">短视频</a>
+                </div>
+            </div>
         </div>
-        <div id="mobNav" class="md:hidden hidden pb-4">
-          <div class="flex flex-col gap-2 pt-2 border-t border-gray-200">
-            <a
-              href="/"
-              class="px-4 py-2.5 rounded-md text-sm text-gray-500 hover:bg-gray-100 text-center"
-              >视频搜索</a
-            >
-            <a
-              href="/live.html"
-              class="px-4 py-2.5 rounded-md text-sm text-gray-500 hover:bg-gray-100 text-center"
-              >电视直播</a
-            >
-            <a
-              href="/music.html"
-              class="px-4 py-2.5 rounded-md text-sm bg-indigo-600 text-white text-center rounded-md"
-              >音乐</a
-            >
-            <a
-              href="/swipe.html"
-              class="px-4 py-2.5 rounded-md text-sm text-gray-500 hover:bg-gray-100 text-center"
-              >短视频</a
-            >
-          </div>
-        </div>
-      </div>
     </header>
+
     <main class="max-w-6xl mx-auto px-4 py-6">
-      <div class="max-w-xl mx-auto mb-6">
-        <div class="flex gap-2">
-          <input
-            type="text"
-            id="si"
-            placeholder="搜索歌曲、歌手..."
-            class="flex-1 bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            onkeydown="if (event.key === 'Enter') doSearch();"
-          />
-          <button
-            onclick="doSearch()"
-            class="px-6 py-3 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700"
-          >
-            搜索
-          </button>
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-6 justify-center">
+            <button onclick="showTab('search')" id="tS" class="tab-btn active px-5 py-2 rounded-full text-sm font-medium">🎵 搜索试听</button>
+            <button onclick="showTab('full')" id="tF" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600">🎶 完整播放</button>
+            <button onclick="showTab('playlist')" id="tP" class="tab-btn px-5 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600">📋 播放列表 <span id="pc">(0)</span></button>
         </div>
-        <div class="flex flex-wrap gap-2 mt-3">
-          <button
-            onclick="qs('周杰伦')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            周杰伦
-          </button>
-          <button
-            onclick="qs('Taylor Swift')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Taylor Swift
-          </button>
-          <button
-            onclick="qs('薛之谦')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            薛之谦
-          </button>
-          <button
-            onclick="qs('邓紫棋')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            邓紫棋
-          </button>
-          <button
-            onclick="qs('林俊杰')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            林俊杰
-          </button>
-          <button
-            onclick="qs('Adele')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Adele
-          </button>
-          <button
-            onclick="qs('陈奕迅')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            陈奕迅
-          </button>
-          <button
-            onclick="qs('刘德华')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            刘德华
-          </button>
-          <button
-            onclick="qs('五月天')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            五月天
-          </button>
-          <button
-            onclick="qs('Ed Sheeran')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Ed Sheeran
-          </button>
-          <button
-            onclick="qs('华晨宇')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            华晨宇
-          </button>
-          <button
-            onclick="qs('毛不易')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            毛不易
-          </button>
-          <button
-            onclick="qs('张学友')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            张学友
-          </button>
-          <button
-            onclick="qs('李荣浩')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            李荣浩
-          </button>
-          <button
-            onclick="qs('王力宏')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            王力宏
-          </button>
-          <button
-            onclick="qs('Billie Eilish')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Billie Eilish
-          </button>
-          <button
-            onclick="qs('Bruno Mars')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Bruno Mars
-          </button>
-          <button
-            onclick="qs('The Weeknd')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            The Weeknd
-          </button>
-          <button
-            onclick="qs('李宗盛')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            李宗盛
-          </button>
-          <button
-            onclick="qs('许嵩')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            许嵩
-          </button>
-          <button
-            onclick="qs('张杰')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            张杰
-          </button>
-          <button
-            onclick="qs('蔡依林')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            蔡依林
-          </button>
-          <button
-            onclick="qs('张靓颖')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            张靓颖
-          </button>
-          <button
-            onclick="qs('Ariana Grande')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Ariana Grande
-          </button>
-          <button
-            onclick="qs('Justin Bieber')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Justin Bieber
-          </button>
-          <button
-            onclick="qs('孙燕姿')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            孙燕姿
-          </button>
-          <button
-            onclick="qs('BTS')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            BTS
-          </button>
-          <button
-            onclick="qs('BLACKPINK')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            BLACKPINK
-          </button>
-          <button
-            onclick="qs('梁静茹')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            梁静茹
-          </button>
-          <button
-            onclick="qs('汪苏泷')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            汪苏泷
-          </button>
-          <button
-            onclick="qs('Sam Smith')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Sam Smith
-          </button>
-          <button
-            onclick="qs('张国荣')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            张国荣
-          </button>
-          <button
-            onclick="qs('王菲')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            王菲
-          </button>
-          <button
-            onclick="qs('Dua Lipa')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Dua Lipa
-          </button>
-          <button
-            onclick="qs('陶喆')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            陶喆
-          </button>
-          <button
-            onclick="qs('Maroon 5')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Maroon 5
-          </button>
-          <button
-            onclick="qs('田馥甄')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            田馥甄
-          </button>
-          <button
-            onclick="qs('鹿晗')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            鹿晗
-          </button>
-          <button
-            onclick="qs('Coldplay')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Coldplay
-          </button>
-          <button
-            onclick="qs('张惠妹')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            张惠妹
-          </button>
-          <button
-            onclick="qs('徐佳莹')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            徐佳莹
-          </button>
-          <button
-            onclick="qs('Imagine Dragons')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Imagine Dragons
-          </button>
-          <button
-            onclick="qs('邓丽君')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            邓丽君
-          </button>
-          <button
-            onclick="qs('周深')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            周深
-          </button>
-          <button
-            onclick="qs('Charlie Puth')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Charlie Puth
-          </button>
-          <button
-            onclick="qs('李玟')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            李玟
-          </button>
-          <button
-            onclick="qs('Shawn Mendes')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            Shawn Mendes
-          </button>
-          <button
-            onclick="qs('胡彦斌')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            胡彦斌
-          </button>
-          <button
-            onclick="qs('OneRepublic')"
-            class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-          >
-            OneRepublic
-          </button>
-          <!-- Hidden tags - shown when "Load More" is clicked -->
-          <div id="moreTags" class="hidden flex flex-wrap gap-2 mt-2">
-            <button
-              onclick="qs('莫文蔚')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              莫文蔚
-            </button>
-            <button
-              onclick="qs('赵雷')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              赵雷
-            </button>
-            <button
-              onclick="qs('Rihanna')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Rihanna
-            </button>
-            <button
-              onclick="qs('李健')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              李健
-            </button>
-            <button
-              onclick="qs('Post Malone')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Post Malone
-            </button>
-            <button
-              onclick="qs('吴青峰')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              吴青峰
-            </button>
-            <button
-              onclick="qs('张信哲')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              张信哲
-            </button>
-            <button
-              onclick="qs('Lady Gaga')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Lady Gaga
-            </button>
-            <button
-              onclick="qs('萧敬腾')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              萧敬腾
-            </button>
-            <button
-              onclick="qs('Katy Perry')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Katy Perry
-            </button>
-            <button
-              onclick="qs('陈小春')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              陈小春
-            </button>
-            <button
-              onclick="qs('Drake')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Drake
-            </button>
-            <button
-              onclick="qs('方大同')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              方大同
-            </button>
-            <button
-              onclick="qs('张震岳')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              张震岳
-            </button>
-            <button
-              onclick="qs('Sia')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Sia
-            </button>
-            <button
-              onclick="qs('庾澄庆')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              庾澄庆
-            </button>
-            <button
-              onclick="qs('EXO')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              EXO
-            </button>
-            <button
-              onclick="qs('陈楚生')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              陈楚生
-            </button>
-            <button
-              onclick="qs('苏打绿')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              苏打绿
-            </button>
-            <button
-              onclick="qs('Zayn')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Zayn
-            </button>
-            <button
-              onclick="qs('杨宗纬')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              杨宗纬
-            </button>
-            <button
-              onclick="qs('Ellie Goulding')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Ellie Goulding
-            </button>
-            <button
-              onclick="qs('品冠')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              品冠
-            </button>
-            <button
-              onclick="qs('张韶涵')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              张韶涵
-            </button>
-            <button
-              onclick="qs('Khalid')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Khalid
-            </button>
-            <button
-              onclick="qs('任贤齐')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              任贤齐
-            </button>
-            <button
-              onclick="qs('Travis Scott')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Travis Scott
-            </button>
-            <button
-              onclick="qs('郁可唯')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              郁可唯
-            </button>
-            <button
-              onclick="qs('信乐团')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              信乐团
-            </button>
-            <button
-              onclick="qs('Halsey')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Halsey
-            </button>
-            <button
-              onclick="qs('谭维维')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              谭维维
-            </button>
-            <button
-              onclick="qs('Camila Cabello')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Camila Cabello
-            </button>
-            <button
-              onclick="qs('吉克隽逸')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              吉克隽逸
-            </button>
-            <button
-              onclick="qs('逃跑计划')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              逃跑计划
-            </button>
-            <button
-              onclick="qs('Lauv')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Lauv
-            </button>
-            <button
-              onclick="qs('杨丞琳')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              杨丞琳
-            </button>
-            <button
-              onclick="qs('Lorde')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Lorde
-            </button>
-            <button
-              onclick="qs('容祖儿')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              容祖儿
-            </button>
-            <button
-              onclick="qs('光良')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              光良
-            </button>
-            <button
-              onclick="qs('Selena Gomez')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Selena Gomez
-            </button>
-            <button
-              onclick="qs('林宥嘉')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              林宥嘉
-            </button>
-            <button
-              onclick="qs('Jason Mraz')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Jason Mraz
-            </button>
-            <button
-              onclick="qs('潘玮柏')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              潘玮柏
-            </button>
-            <button
-              onclick="qs('张宇')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              张宇
-            </button>
-            <button
-              onclick="qs('James Arthur')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              James Arthur
-            </button>
-            <button
-              onclick="qs('戴佩妮')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              戴佩妮
-            </button>
-            <button
-              onclick="qs('Nicki Minaj')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Nicki Minaj
-            </button>
-            <button
-              onclick="qs('谢霆锋')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              谢霆锋
-            </button>
-            <button
-              onclick="qs('羽泉')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              羽泉
-            </button>
-            <button
-              onclick="qs('Miley Cyrus')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Miley Cyrus
-            </button>
-            <button
-              onclick="qs('韦礼安')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              韦礼安
-            </button>
-            <button
-              onclick="qs('Niall Horan')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Niall Horan
-            </button>
-            <button
-              onclick="qs('金莎')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              金莎
-            </button>
-            <button
-              onclick="qs('袁娅维')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              袁娅维
-            </button>
-            <button
-              onclick="qs('Troye Sivan')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Troye Sivan
-            </button>
-            <button
-              onclick="qs('黄小琥')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              黄小琥
-            </button>
-            <button
-              onclick="qs('OneDirection')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              OneDirection
-            </button>
-            <button
-              onclick="qs('金志文')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              金志文
-            </button>
-            <button
-              onclick="qs('好妹妹乐队')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              好妹妹乐队
-            </button>
-            <button
-              onclick="qs('Lewis Capaldi')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Lewis Capaldi
-            </button>
-            <button
-              onclick="qs('郭静')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              郭静
-            </button>
-            <button
-              onclick="qs('平井坚')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              平井坚
-            </button>
-            <button
-              onclick="qs('丁当')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              丁当
-            </button>
-            <button
-              onclick="qs('Cardi B')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Cardi B
-            </button>
-            <button
-              onclick="qs('胡夏')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              胡夏
-            </button>
-            <button
-              onclick="qs('梁博')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              梁博
-            </button>
-            <button
-              onclick="qs('Zara Larsson')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Zara Larsson
-            </button>
-            <button
-              onclick="qs('郭采洁')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              郭采洁
-            </button>
-            <button
-              onclick="qs('Anne-Marie')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Anne-Marie
-            </button>
-            <button
-              onclick="qs('吴克群')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              吴克群
-            </button>
-            <button
-              onclick="qs('黄绮珊')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              黄绮珊
-            </button>
-            <button
-              onclick="qs('Tones and I')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Tones and I
-            </button>
-            <button
-              onclick="qs('萧亚轩')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              萧亚轩
-            </button>
-            <button
-              onclick="qs('Bebe Rexha')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Bebe Rexha
-            </button>
-            <button
-              onclick="qs('曾轶可')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              曾轶可
-            </button>
-            <button
-              onclick="qs('伍佰')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              伍佰
-            </button>
-            <button
-              onclick="qs('Meghan Trainor')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Meghan Trainor
-            </button>
-            <button
-              onclick="qs('吴莫愁')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              吴莫愁
-            </button>
-            <button
-              onclick="qs('Tate McRae')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Tate McRae
-            </button>
-            <button
-              onclick="qs('胡66')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              胡66
-            </button>
-            <button
-              onclick="qs('金池')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              金池
-            </button>
-            <button
-              onclick="qs('Ava Max')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Ava Max
-            </button>
-            <button
-              onclick="qs('南征北战')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              南征北战
-            </button>
-            <button
-              onclick="qs('H.O.T')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              H.O.T
-            </button>
-            <button
-              onclick="qs('张碧晨')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              张碧晨
-            </button>
-            <button
-              onclick="qs('齐秦')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              齐秦
-            </button>
-            <button
-              onclick="qs('Conan Gray')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              Conan Gray
-            </button>
-            <button
-              onclick="qs('黄致列')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              黄致列
-            </button>
-            <button
-              onclick="qs('张雨生')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              张雨生
-            </button>
-            <button
-              onclick="qs('NewJeans')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              NewJeans
-            </button>
-            <button
-              onclick="qs('谭咏麟')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              谭咏麟
-            </button>
-            <button
-              onclick="qs('J Balvin')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              J Balvin
-            </button>
-            <button
-              onclick="qs('张明敏')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              张明敏
-            </button>
-            <button
-              onclick="qs('TWICE')"
-              class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-            >
-              TWICE
-            </button>
-          </div>
-        </div>
-        <button
-          id="loadMoreBtn"
-          onclick="toggleMoreTags()"
-          class="mt-3 px-4 py-2 text-sm text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors flex items-center gap-2 mx-auto"
-        >
-          <span id="loadMoreText">加载更多歌手</span>
-          <svg
-            id="loadMoreIcon"
-            class="w-4 h-4 transition-transform"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </button>
-      </div>
-      <div class="flex gap-2 mb-4">
-        <button
-          onclick="showTab('results')"
-          id="tR"
-          class="tab-btn active px-4 py-1.5 rounded-full text-sm font-medium"
-        >
-          🎵 搜索结果
-        </button>
-        <button
-          onclick="showTab('playlist')"
-          id="tP"
-          class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600"
-        >
-          📋 播放列表 <span id="pc">(0)</span>
-        </button>
-      </div>
-      <div id="loading" class="hidden text-center py-12">
-        <div
-          class="inline-block w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"
-        ></div>
-        <p class="mt-3 text-gray-500 text-sm">搜索中...</p>
-      </div>
 
-      <!-- Two column layout: content left, lyrics right -->
-      <div class="flex flex-col lg:flex-row gap-4">
-        <!-- Left: results / playlist -->
-        <div class="flex-1 min-w-0">
-          <div id="rP"><div id="res" class="space-y-2"></div></div>
-          <div id="pP" class="hidden">
-            <div class="flex justify-between items-center mb-3">
-              <span class="text-sm text-gray-500"
-                >已保存 <span id="pc2">0</span> 首</span
-              ><button
-                onclick="clearPL()"
-                class="text-xs text-red-500 hover:text-red-700"
-              >
-                清空
-              </button>
+        <!-- Search tab -->
+        <div id="searchPanel">
+            <div class="max-w-xl mx-auto mb-6">
+                <div class="flex gap-2">
+                    <input type="text" id="si" placeholder="搜索歌曲、歌手..." class="flex-1 bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" onkeydown="if(event.key==='Enter')doSearch()">
+                    <button onclick="doSearch()" class="px-6 py-3 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">搜索</button>
+                </div>
+                <div class="flex flex-wrap gap-2 mt-3">
+                    <button onclick="qs('周杰伦')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">周杰伦</button>
+                    <button onclick="qs('Taylor Swift')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">Taylor Swift</button>
+                    <button onclick="qs('Adele')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">Adele</button>
+                    <button onclick="qs('薛之谦')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">薛之谦</button>
+                    <button onclick="qs('Ed Sheeran')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">Ed Sheeran</button>
+                    <button onclick="qs('BTS')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">BTS</button>
+                </div>
+                <p class="text-xs text-gray-400 mt-2 text-center">🎧 试听模式 (30秒预览) · 切换「完整播放」标签收听完整歌曲</p>
             </div>
+            <div id="loading" class="hidden text-center py-12"><div class="inline-block w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div></div>
+            <div id="res" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+        </div>
+
+        <!-- Full playback tab (embedded site) -->
+        <div id="fullPanel" class="hidden">
+            <p class="text-center text-gray-500 text-sm mb-3">完整歌曲播放 — 由歌曲宝提供</p>
+            <iframe src="https://www.gequbao.com/" class="w-full border border-gray-200 rounded-lg" style="height:calc(100vh - 10rem)" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" title="歌曲宝"></iframe>
+        </div>
+
+        <!-- Playlist tab -->
+        <div id="plPanel" class="hidden">
+            <div class="flex justify-between items-center mb-3"><span class="text-sm text-gray-500">已保存 <span id="pc2">0</span> 首</span><button onclick="clearPL()" class="text-xs text-red-500 hover:text-red-700">清空</button></div>
             <div id="plItems" class="space-y-1"></div>
-            <div id="ePL" class="text-center py-16 text-gray-400">
-              <div class="text-5xl mb-3">📋</div>
-              <p>播放列表为空，点击 ❤️ 添加歌曲</p>
-            </div>
-          </div>
-          <div id="defMsg" class="text-center py-16">
-            <div class="text-6xl mb-4">🎶</div>
-            <p class="text-gray-400">搜索你喜欢的音乐，支持完整播放</p>
-          </div>
+            <div id="ePL" class="text-center py-16 text-gray-400"><div class="text-5xl mb-3">📋</div><p>播放列表为空，点击 ❤️ 添加歌曲</p></div>
         </div>
-
-        <!-- Right: lyrics -->
-        <div id="lrcPanel" class="hidden lg:w-80 flex-shrink-0">
-          <div
-            class="border border-gray-200 rounded-lg bg-white overflow-hidden sticky top-16"
-          >
-            <div
-              class="flex items-center justify-between px-4 py-2 border-b border-gray-100 bg-gray-50/80"
-            >
-              <span class="text-sm font-medium text-gray-700">🎤 歌词</span>
-              <button
-                onclick="
-                  document.getElementById('lrcPanel').classList.add('hidden')
-                "
-                class="text-gray-400 hover:text-gray-600 text-lg"
-              >
-                ✕
-              </button>
-            </div>
-            <div
-              id="lrcBox"
-              class="h-[28rem] overflow-y-auto px-4 py-3"
-              style="scroll-behavior: smooth"
-            >
-              <div
-                id="lrcContent"
-                class="space-y-1 text-center text-sm text-gray-500"
-              ></div>
-            </div>
-          </div>
-        </div>
-      </div>
     </main>
 
     <!-- Player Bar -->
-    <div
-      id="pBar"
-      class="fixed bottom-0 left-0 right-0 border-t border-gray-200 shadow-lg z-50 hidden"
-      style="backdrop-filter: blur(20px); background: rgba(245, 244, 238, 0.95)"
-    >
-      <div class="h-1.5 bg-gray-200 cursor-pointer" onclick="seek(event)">
-        <div
-          id="pF"
-          class="h-full bg-indigo-500 rounded-r-full"
-          style="width: 0%; transition: width 0.1s linear"
-        ></div>
-      </div>
-      <div class="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-3">
-        <img
-          id="pArt"
-          src=""
-          class="w-11 h-11 rounded-lg object-cover bg-indigo-100 flex-shrink-0"
-          alt=""
-          onerror="
-            this.src =
-              'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect fill=%22%23e0e7ff%22 width=%2240%22 height=%2240%22/><text x=%2220%22 y=%2226%22 text-anchor=%22middle%22 font-size=%2220%22>🎵</text></svg>'
-          "
-        />
-        <div class="min-w-0 flex-1">
-          <div id="pT" class="text-sm font-medium truncate">未播放</div>
-          <div id="pA" class="text-xs text-gray-500 truncate">-</div>
+    <div id="pBar" class="fixed bottom-0 left-0 right-0 border-t border-gray-200 shadow-lg z-50 hidden" style="backdrop-filter:blur(20px);background:rgba(245,244,238,.95)">
+        <div class="h-1.5 bg-gray-200 cursor-pointer" onclick="seek(event)"><div id="pF" class="h-full bg-indigo-500 rounded-r-full" style="width:0%;transition:width .1s linear"></div></div>
+        <div class="max-w-6xl mx-auto px-4 py-2.5 flex items-center gap-3">
+            <img id="pArt" src="" class="w-11 h-11 rounded-lg object-cover bg-indigo-100 flex-shrink-0" alt="">
+            <div class="min-w-0 flex-1"><div id="pT" class="text-sm font-medium truncate">未播放</div><div id="pA" class="text-xs text-gray-500 truncate">-</div></div>
+            <div class="flex items-center gap-2">
+                <button onclick="prev()" class="p-1.5 hover:bg-gray-100 rounded-full">⏮</button>
+                <button onclick="toggle()" class="p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700" id="playBtn">▶</button>
+                <button onclick="next()" class="p-1.5 hover:bg-gray-100 rounded-full">⏭</button>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500">
+                <span id="cT">0:00</span>/<span id="dT">0:00</span>
+                <input type="range" class="vol w-16" min="0" max="100" value="80" oninput="au.volume=this.value/100">
+            </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="prev()" class="p-1.5 hover:bg-gray-100 rounded-full">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
-            </svg>
-          </button>
-          <button
-            onclick="toggle()"
-            class="p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700"
-          >
-            <svg
-              id="iP"
-              class="w-5 h-5"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            <svg
-              id="iPa"
-              class="w-5 h-5 hidden"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-            </svg>
-          </button>
-          <button onclick="next()" class="p-1.5 hover:bg-gray-100 rounded-full">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
-            </svg>
-          </button>
-        </div>
-        <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500">
-          <span id="cT">0:00</span>/<span id="dT">0:00</span>
-          <input
-            type="range"
-            class="vol w-16"
-            min="0"
-            max="100"
-            value="80"
-            oninput="au.volume = this.value / 100"
-          />
-        </div>
-      </div>
     </div>
     <audio id="au" preload="auto"></audio>
 
     <script>
-      const au = document.getElementById("au");
-      let tracks = [],
-        curIdx = -1;
-      let pl = JSON.parse(localStorage.getItem("musicPL") || "[]");
+    const au = document.getElementById('au');
+    let tracks = [], curIdx = -1;
+    let pl = JSON.parse(localStorage.getItem('musicPL') || '[]');
 
-      function esc(s) {
-        const d = document.createElement("div");
-        d.textContent = s;
-        return d.innerHTML;
-      }
-      function fmt(s) {
-        if (!s) return "-";
-        if (typeof s === "string") return s;
-        const m = Math.floor(s / 60),
-          sec = Math.floor(s % 60);
-        return m + ":" + String(sec).padStart(2, "0");
-      }
-      function qs(q) {
-        document.getElementById("si").value = q;
-        doSearch();
-      }
-      function upc() {
-        document.getElementById("pc").textContent = "(" + pl.length + ")";
-        document.getElementById("pc2").textContent = pl.length;
-      }
-      function inPL(id) {
-        return pl.some((t) => t.id === id);
-      }
-      function ub(p) {
-        document.getElementById("iP").classList.toggle("hidden", p);
-        document.getElementById("iPa").classList.toggle("hidden", !p);
-      }
+    function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+    function fmt(s){if(!s)return'-';const m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+String(sec).padStart(2,'0')}
+    function qs(q){document.getElementById('si').value=q;doSearch()}
+    function upc(){document.getElementById('pc').textContent='('+pl.length+')';document.getElementById('pc2').textContent=pl.length}
+    function inPL(id){return pl.some(t=>t.id===id)}
+    function ub(p){document.getElementById('playBtn').textContent=p?'⏸':'▶'}
 
-      function toggleMoreTags() {
-        const moreTags = document.getElementById("moreTags");
-        const loadMoreText = document.getElementById("loadMoreText");
-        const loadMoreIcon = document.getElementById("loadMoreIcon");
-
-        if (moreTags.classList.contains("hidden")) {
-          moreTags.classList.remove("hidden");
-          loadMoreText.textContent = "收起";
-          loadMoreIcon.style.transform = "rotate(180deg)";
-        } else {
-          moreTags.classList.add("hidden");
-          loadMoreText.textContent = "加载更多歌手";
-          loadMoreIcon.style.transform = "rotate(0deg)";
+    async function doSearch(){
+        const q=document.getElementById('si').value.trim();
+        if(!q)return;
+        document.getElementById('loading').classList.remove('hidden');
+        document.getElementById('res').innerHTML='';
+        try{
+            const r=await fetch('/api/music/search?q='+encodeURIComponent(q));
+            const d=await r.json();
+            tracks=(d.data||[]).filter(t=>t.preview);
+            document.getElementById('loading').classList.add('hidden');
+            if(!tracks.length){document.getElementById('res').innerHTML='<div class="col-span-full text-center py-16 text-gray-400">😔 没有找到结果</div>';return}
+            renderTracks();
+        }catch(e){
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('res').innerHTML='<div class="col-span-full text-center py-16 text-gray-400">搜索失败</div>';
         }
-      }
+    }
 
-      async function doSearch() {
-        const q = document.getElementById("si").value.trim();
-        if (!q) return;
-        showTab("results");
-        document.getElementById("defMsg").classList.add("hidden");
-        document.getElementById("loading").classList.remove("hidden");
-        document.getElementById("res").innerHTML = "";
-        try {
-          const r = await fetch("/api/music/search?q=" + encodeURIComponent(q));
-          const d = await r.json();
-          tracks = d.data || [];
-          document.getElementById("loading").classList.add("hidden");
-          if (!tracks.length) {
-            document.getElementById("res").innerHTML =
-              '<div class="text-center py-16 text-gray-400"><div class="text-5xl mb-3">😔</div><p>没有找到结果</p></div>';
-            return;
-          }
-          renderTracks();
-        } catch (e) {
-          document.getElementById("loading").classList.add("hidden");
-          document.getElementById("res").innerHTML =
-            '<div class="text-center py-16 text-gray-400"><p>搜索失败: ' +
-            esc(e.message) +
-            "</p></div>";
-        }
-      }
-
-      function renderTracks() {
-        document.getElementById("res").innerHTML = tracks
-          .map(
-            (t, i) => `
-            <div class="mc border border-gray-200 rounded-lg p-3 bg-white ${curIdx === i ? "now-playing" : ""}" onclick="playSong(${i})">
+    function renderTracks(){
+        document.getElementById('res').innerHTML=tracks.map((t,i)=>{
+            const cover=t.album?.cover_small||'';
+            const artist=t.artist?.name||'';
+            return `<div class="mc border border-gray-200 rounded-lg p-3 bg-white ${curIdx===i?'now-playing':''}" onclick="play(${i})">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-lg flex-shrink-0">
-                        ${curIdx === i ? '<div class="eq"><span></span><span></span><span></span><span></span></div>' : "🎵"}
-                    </div>
+                    <img src="${esc(cover)}" class="w-12 h-12 rounded-lg object-cover bg-gray-100 flex-shrink-0" alt="" onerror="this.style.display='none'">
                     <div class="min-w-0 flex-1">
-                        <div class="text-sm font-medium truncate">${esc(t.title)}</div>
-                        <div class="text-xs text-gray-500 truncate">${esc(t.artist)}</div>
+                        <div class="text-sm font-medium truncate">${curIdx===i?'<span class="eq"><span></span><span></span><span></span><span></span></span> ':''}${esc(t.title_short||t.title)}</div>
+                        <div class="text-xs text-gray-500 truncate">${esc(artist)}</div>
                     </div>
-                    <button onclick="event.stopPropagation();tglPL(${i})" class="p-1.5 rounded-full hover:bg-gray-100 text-lg">${inPL(t.id) ? "❤️" : "🤍"}</button>
+                    <button onclick="event.stopPropagation();tglPL(${i})" class="p-1.5 rounded-full hover:bg-gray-100 text-lg">${inPL(t.id)?'❤️':'🤍'}</button>
+                    <span class="text-xs text-gray-400">${fmt(t.duration)}</span>
                 </div>
-            </div>
-        `,
-          )
-          .join("");
-      }
+            </div>`;
+        }).join('');
+    }
 
-      async function playSong(i) {
-        if (i < 0 || i >= tracks.length) return;
-        curIdx = i;
-        const t = tracks[i];
-        document.getElementById("pBar").classList.remove("hidden");
-        document.getElementById("pT").textContent = t.title;
-        document.getElementById("pA").textContent = t.artist;
-        document.getElementById("pArt").src = t.cover || "";
-        renderTracks();
-        // Step 1: get detail (play_id + cover)
-        try {
-          const dr = await fetch("/api/music/detail?id=" + t.id);
-          const dd = await dr.json();
-          if (dd.code !== 200 || !dd.data) throw new Error("Detail failed");
-          const appData = dd.data;
-          if (appData.mp3_cover)
-            document.getElementById("pArt").src = appData.mp3_cover;
-          // Show lyrics
-          showLyrics(appData.lrc || "");
-          // Step 2: get play URL
-          const pr = await fetch(
-            "/api/music/play-url?play_id=" +
-              encodeURIComponent(appData.play_id),
-          );
-          const pd = await pr.json();
-          if (pd.code !== 1 || !pd.data?.url)
-            throw new Error("Play URL failed");
-          au.src = pd.data.url;
-          au.volume = document.querySelector(".vol")?.value / 100 || 0.8;
-          au.play().catch(() => {});
-          ub(true);
-        } catch (e) {
-          console.error("Play error:", e);
-          document.getElementById("pT").textContent = "播放失败: " + t.title;
-          ub(false);
-        }
-      }
+    function play(i){
+        if(i<0||i>=tracks.length)return;
+        curIdx=i;const t=tracks[i];
+        au.src=t.preview;
+        au.volume=document.querySelector('.vol')?.value/100||0.8;
+        au.play().catch(()=>{});
+        document.getElementById('pBar').classList.remove('hidden');
+        document.getElementById('pT').textContent=t.title_short||t.title;
+        document.getElementById('pA').textContent=t.artist?.name||'';
+        document.getElementById('pArt').src=t.album?.cover_small||'';
+        ub(true);renderTracks();
+    }
 
-      function toggle() {
-        au.paused ? (au.play(), ub(true)) : (au.pause(), ub(false));
-      }
-      function next() {
-        if (curIdx < tracks.length - 1) playSong(curIdx + 1);
-      }
-      function prev() {
-        if (curIdx > 0) playSong(curIdx - 1);
-      }
-      function seek(e) {
-        if (!au.duration) return;
-        const r = e.currentTarget.getBoundingClientRect();
-        au.currentTime = ((e.clientX - r.left) / r.width) * au.duration;
-      }
+    function toggle(){au.paused?(au.play(),ub(true)):(au.pause(),ub(false))}
+    function next(){if(curIdx<tracks.length-1)play(curIdx+1)}
+    function prev(){if(curIdx>0)play(curIdx-1)}
+    function seek(e){if(!au.duration)return;const r=e.currentTarget.getBoundingClientRect();au.currentTime=(e.clientX-r.left)/r.width*au.duration}
 
-      au.addEventListener("timeupdate", () => {
-        if (!au.duration) return;
-        document.getElementById("pF").style.width =
-          (au.currentTime / au.duration) * 100 + "%";
-        document.getElementById("cT").textContent = fmt(au.currentTime);
-        document.getElementById("dT").textContent = fmt(au.duration);
-      });
-      au.addEventListener("ended", () => {
-        ub(false);
-        next();
-      });
-      au.addEventListener("pause", () => ub(false));
-      au.addEventListener("play", () => ub(true));
+    au.addEventListener('timeupdate',()=>{if(!au.duration)return;document.getElementById('pF').style.width=(au.currentTime/au.duration*100)+'%';document.getElementById('cT').textContent=fmt(au.currentTime);document.getElementById('dT').textContent=fmt(au.duration)});
+    au.addEventListener('ended',()=>{ub(false);next()});
+    au.addEventListener('pause',()=>ub(false));
+    au.addEventListener('play',()=>ub(true));
 
-      // Playlist
-      function tglPL(i) {
-        const t = tracks[i];
-        if (inPL(t.id)) {
-          pl = pl.filter((x) => x.id !== t.id);
-        } else {
-          pl.push({
-            id: t.id,
-            title: t.title,
-            artist: t.artist,
-            cover: t.cover || "",
-          });
-        }
-        localStorage.setItem("musicPL", JSON.stringify(pl));
-        upc();
-        renderTracks();
-        renderPL();
-      }
-      function clearPL() {
-        pl = [];
-        localStorage.removeItem("musicPL");
-        upc();
-        renderPL();
-      }
-      function removePLi(i) {
-        pl.splice(i, 1);
-        localStorage.setItem("musicPL", JSON.stringify(pl));
-        upc();
-        renderPL();
-      }
-      function renderPL() {
-        if (!pl.length) {
-          document.getElementById("plItems").innerHTML = "";
-          document.getElementById("ePL").classList.remove("hidden");
-          return;
-        }
-        document.getElementById("ePL").classList.add("hidden");
-        document.getElementById("plItems").innerHTML = pl
-          .map(
-            (t, i) => `
-            <div class="pli flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer" onclick="playFromPL(${i})">
-                <div class="w-8 h-8 rounded bg-indigo-100 flex items-center justify-center text-sm flex-shrink-0">🎵</div>
+    // Playlist
+    function tglPL(i){
+        const t=tracks[i];
+        if(inPL(t.id)){pl=pl.filter(x=>x.id!==t.id)}
+        else{pl.push({id:t.id,title:t.title_short||t.title,artist:t.artist?.name||'',cover:t.album?.cover_small||'',preview:t.preview,duration:t.duration})}
+        localStorage.setItem('musicPL',JSON.stringify(pl));upc();renderTracks();renderPL();
+    }
+    function clearPL(){pl=[];localStorage.removeItem('musicPL');upc();renderPL()}
+    function removePLi(i){pl.splice(i,1);localStorage.setItem('musicPL',JSON.stringify(pl));upc();renderPL()}
+    function renderPL(){
+        if(!pl.length){document.getElementById('plItems').innerHTML='';document.getElementById('ePL').classList.remove('hidden');return}
+        document.getElementById('ePL').classList.add('hidden');
+        document.getElementById('plItems').innerHTML=pl.map((t,i)=>`
+            <div class="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-50" onclick="playFromPL(${i})">
+                <img src="${esc(t.cover)}" class="w-10 h-10 rounded object-cover bg-gray-100 flex-shrink-0" alt="" onerror="this.style.display='none'">
                 <div class="min-w-0 flex-1"><div class="text-sm font-medium truncate">${esc(t.title)}</div><div class="text-xs text-gray-500 truncate">${esc(t.artist)}</div></div>
+                <span class="text-xs text-gray-400">${fmt(t.duration)}</span>
                 <button onclick="event.stopPropagation();removePLi(${i})" class="p-1 text-gray-400 hover:text-red-500">✕</button>
             </div>
-        `,
-          )
-          .join("");
-      }
-      function playFromPL(i) {
-        tracks = pl.map((x) => ({
-          id: x.id,
-          title: x.title,
-          artist: x.artist,
-          cover: x.cover || "",
-        }));
-        curIdx = i;
-        playSong(i);
-      }
-      function showTab(t) {
-        document
-          .getElementById("rP")
-          .classList.toggle("hidden", t !== "results");
-        document
-          .getElementById("pP")
-          .classList.toggle("hidden", t !== "playlist");
-        document
-          .getElementById("tR")
-          .classList.toggle("active", t === "results");
-        document
-          .getElementById("tP")
-          .classList.toggle("active", t === "playlist");
-        document
-          .getElementById("tR")
-          .classList.toggle("bg-gray-100", t !== "results");
-        document
-          .getElementById("tR")
-          .classList.toggle("text-gray-600", t !== "results");
-        document
-          .getElementById("tP")
-          .classList.toggle("bg-gray-100", t !== "playlist");
-        document
-          .getElementById("tP")
-          .classList.toggle("text-gray-600", t !== "playlist");
-        if (t === "playlist") renderPL();
-      }
-      upc();
-      // Lyrics
-      let lrcLines = []; // [{time: seconds, text: string}]
-      let curLrcIdx = -1;
+        `).join('');
+    }
+    function playFromPL(i){
+        tracks=pl.map(x=>({id:x.id,title:x.title,title_short:x.title,artist:{name:x.artist},album:{cover_small:x.cover},preview:x.preview,duration:x.duration}));
+        play(i);
+    }
 
-      function parseLRC(lrc) {
-        if (!lrc) return [];
-        const lines = lrc.split("\n");
-        const parsed = [];
-        for (const line of lines) {
-          const m = line.match(/\[(\d{2}):(\d{2})\.(\d{1,3})\](.*)/);
-          if (m) {
-            const time =
-              parseInt(m[1]) * 60 +
-              parseInt(m[2]) +
-              parseInt(m[3]) /
-                (m[3].length === 3 ? 1000 : m[3].length === 2 ? 100 : 10);
-            const text = m[4].trim();
-            if (text) parsed.push({ time, text });
-          }
-        }
-        return parsed.sort((a, b) => a.time - b.time);
-      }
+    function showTab(t){
+        document.getElementById('searchPanel').classList.toggle('hidden',t!=='search');
+        document.getElementById('fullPanel').classList.toggle('hidden',t!=='full');
+        document.getElementById('plPanel').classList.toggle('hidden',t!=='playlist');
+        ['tS','tF','tP'].forEach(id=>{
+            const el=document.getElementById(id);
+            const active=(id==='tS'&&t==='search')||(id==='tF'&&t==='full')||(id==='tP'&&t==='playlist');
+            el.classList.toggle('active',active);
+            el.classList.toggle('bg-gray-100',!active);
+            el.classList.toggle('text-gray-600',!active);
+        });
+        if(t==='playlist')renderPL();
+    }
 
-      function showLyrics(lrc) {
-        lrcLines = parseLRC(lrc);
-        curLrcIdx = -1;
-        const panel = document.getElementById("lrcPanel");
-        const content = document.getElementById("lrcContent");
-        if (!lrcLines.length) {
-          panel.classList.add("hidden");
-          return;
-        }
-        panel.classList.remove("hidden");
-        content.innerHTML = lrcLines
-          .map(
-            (l, i) =>
-              `<p id="lrc-${i}" class="py-1 transition-all duration-300 text-gray-400 text-sm">${esc(l.text)}</p>`,
-          )
-          .join("");
-      }
-
-      function syncLyrics() {
-        if (!lrcLines.length) return;
-        const t = au.currentTime;
-        let idx = -1;
-        for (let i = lrcLines.length - 1; i >= 0; i--) {
-          if (t >= lrcLines[i].time) {
-            idx = i;
-            break;
-          }
-        }
-        if (idx === curLrcIdx) return;
-        curLrcIdx = idx;
-        const content = document.getElementById("lrcContent");
-        const children = content.children;
-        for (let i = 0; i < children.length; i++) {
-          if (i === idx) {
-            children[i].className =
-              "py-1 transition-all duration-300 text-indigo-600 font-semibold text-base";
-          } else {
-            children[i].className =
-              "py-1 transition-all duration-300 text-gray-400 text-sm";
-          }
-        }
-        if (idx >= 0) {
-          const el = document.getElementById("lrc-" + idx);
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }
-
-      au.addEventListener("timeupdate", syncLyrics);
+    // Load chart on init
+    upc();
+    (async function(){
+        try{
+            const r=await fetch('/api/music/chart');
+            const d=await r.json();
+            tracks=(d.data||[]).filter(t=>t.preview);
+            if(tracks.length)renderTracks();
+        }catch(e){}
+    })();
     </script>
-  </body>
+</body>
 </html>

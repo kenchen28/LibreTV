@@ -65,7 +65,7 @@ async function renderPage(filePath, password) {
   return content;
 }
 
-app.get(['/', '/index.html', '/player.html', '/live.html', '/swipe.html', '/music.html'], async (req, res) => {
+app.get(['/', '/index.html', '/player.html', '/live.html', '/swipe.html', '/music.html', '/books.html'], async (req, res) => {
   try {
     let filePath;
     switch (req.path) {
@@ -80,6 +80,9 @@ app.get(['/', '/index.html', '/player.html', '/live.html', '/swipe.html', '/musi
         break;
       case '/music.html':
         filePath = path.join(__dirname, 'music.html');
+        break;
+      case '/books.html':
+        filePath = path.join(__dirname, 'books.html');
         break;
       default: // '/' 和 '/index.html'
         filePath = path.join(__dirname, 'index.html');
@@ -167,52 +170,16 @@ app.get('/api/music/:action', async (req, res) => {
   try {
     const { action } = req.params;
     const ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36';
-    const base = 'https://www.gequbao.com';
 
     if (action === 'search') {
       const q = req.query.q;
       if (!q) return res.status(400).json({ error: 'Missing q param' });
-      const resp = await axios.get(`${base}/s/${encodeURIComponent(q)}`, { timeout: 10000, headers: { 'User-Agent': ua } });
-      const html = resp.data;
-      // Parse search results: extract /music/{id} and title="歌名 - 歌手"
-      const regex = /href="\/music\/(\d+)"[^>]*title="([^"]+)"/g;
-      const results = [];
-      const seen = new Set();
-      let m;
-      while ((m = regex.exec(html)) !== null) {
-        if (seen.has(m[1])) continue;
-        seen.add(m[1]);
-        const parts = m[2].split(' - ');
-        results.push({ id: m[1], title: parts[0] || m[2], artist: parts[1] || '' });
-      }
-      return res.json({ code: 200, data: results });
+      const resp = await axios.get(`https://api.deezer.com/search?q=${encodeURIComponent(q)}&limit=30`, { timeout: 10000, headers: { 'User-Agent': ua } });
+      return res.json(resp.data);
     }
 
-    if (action === 'detail') {
-      const id = req.query.id;
-      if (!id) return res.status(400).json({ error: 'Missing id' });
-      const resp = await axios.get(`${base}/music/${id}`, { timeout: 10000, headers: { 'User-Agent': ua } });
-      const html = resp.data;
-      // Extract window.appData JSON
-      const match = html.match(/window\.appData\s*=\s*JSON\.parse\('(.+?)'\)/);
-      if (!match) return res.status(404).json({ error: 'Song data not found' });
-      const jsonStr = match[1].replace(/\\u0022/g, '"').replace(/\\\//g, '/');
-      const appData = JSON.parse(jsonStr);
-      // Extract LRC lyrics
-      const lrcMatch = html.match(/id="content-lrc">([\s\S]*?)<\/div>/);
-      if (lrcMatch) {
-        appData.lrc = lrcMatch[1].replace(/<br\s*\/?>/g, '\n').trim();
-      }
-      return res.json({ code: 200, data: appData });
-    }
-
-    if (action === 'play-url') {
-      const playId = req.query.play_id || req.body?.play_id;
-      if (!playId) return res.status(400).json({ error: 'Missing play_id' });
-      const resp = await axios.post(`${base}/api/play-url`, `id=${encodeURIComponent(playId)}`, {
-        timeout: 10000,
-        headers: { 'User-Agent': ua, 'Referer': base, 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' }
-      });
+    if (action === 'chart') {
+      const resp = await axios.get('https://api.deezer.com/chart/0/tracks?limit=30', { timeout: 10000, headers: { 'User-Agent': ua } });
       return res.json(resp.data);
     }
 
