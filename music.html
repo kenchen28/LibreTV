@@ -12,17 +12,105 @@
     <script src="libs/tailwindcss.min.js"></script>
     <link rel="stylesheet" href="css/styles.css">
     <style>
-        .mc{transition:all .2s;cursor:pointer}.mc:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(0,0,0,.1)}
-        .now-playing{border-color:#4f46e5!important;background:linear-gradient(135deg,#eef2ff,#e0e7ff)!important}
-        .eq{display:flex;align-items:flex-end;gap:2px;height:14px}.eq span{width:3px;background:#4f46e5;border-radius:1px;animation:eqA .6s ease-in-out infinite alternate}
-        .eq span:nth-child(2){animation-delay:.15s}.eq span:nth-child(3){animation-delay:.3s}.eq span:nth-child(4){animation-delay:.1s}
-        @keyframes eqA{0%{height:3px}100%{height:14px}}
-        .vol{-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:#e5e4de;outline:none}
-        .vol::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#4f46e5;cursor:pointer}
-        .tab-btn.active{background:#4f46e5;color:#fff}
+        /* Rotating disc styles inspired by xymp3.vip */
+        .record-wrap {
+            position: relative;
+            width: 240px;
+            height: 240px;
+        }
+        .record-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, #2a2a2a 0%, #1a1a1a 40%, #0a0a0a 100%);
+            box-shadow: 0 15px 40px rgba(0,0,0,.3), inset 0 0 0 2px rgba(255,255,255,.05);
+        }
+        .record-ring::before {
+            content: "";
+            position: absolute;
+            inset: 15px;
+            border-radius: 50%;
+            border: 1px dashed rgba(255,255,255,.08);
+        }
+        .record-ring::after {
+            content: "";
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: #f59e0b;
+            box-shadow: 0 0 0 4px #1a1a1a, 0 0 0 5px rgba(245,158,11,.4);
+            z-index: 2;
+        }
+        .record-img {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #ddd;
+            transition: transform .3s ease;
+        }
+        .spinning { animation: spin 10s linear infinite; }
+        @keyframes spin { from { transform: translate(-50%,-50%) rotate(0); } to { transform: translate(-50%,-50%) rotate(360deg); } }
+        .play-btn-disc {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.9);
+            color: #4f46e5;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity .2s;
+            z-index: 3;
+        }
+        .record-wrap:hover .play-btn-disc { opacity: 1; }
+        .tonearm {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 4px;
+            height: 90px;
+            background: linear-gradient(to bottom, #c0c0c0, #808080);
+            border-radius: 2px;
+            transform-origin: top right;
+            transform: rotate(20deg);
+            transition: transform .6s ease;
+            box-shadow: 2px 2px 4px rgba(0,0,0,.2);
+            z-index: 4;
+        }
+        .tonearm.playing { transform: rotate(-15deg); }
+        .tonearm::after {
+            content: "";
+            position: absolute;
+            bottom: -4px; left: -4px;
+            width: 12px; height: 8px;
+            background: #a0a0a0;
+            border-radius: 2px;
+        }
+
+        .mc { transition: all .2s; cursor: pointer; }
+        .mc:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(0,0,0,.1); }
+        .now-playing { border-color: #4f46e5 !important; background: linear-gradient(135deg,#eef2ff,#e0e7ff) !important; }
+        .eq { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
+        .eq span { width: 3px; background: #4f46e5; border-radius: 1px; animation: eqA .6s ease-in-out infinite alternate; }
+        .eq span:nth-child(2) { animation-delay: .15s; }
+        .eq span:nth-child(3) { animation-delay: .3s; }
+        .eq span:nth-child(4) { animation-delay: .1s; }
+        @keyframes eqA { 0% { height: 3px; } 100% { height: 14px; } }
+        .vol { -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: #e5e4de; outline: none; }
+        .vol::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #4f46e5; cursor: pointer; }
+        .tab-btn.active { background: #4f46e5; color: #fff; }
+        .lrc-line { transition: all .3s ease; padding: .25rem 0; }
+        .lrc-line.active { color: #4f46e5; font-weight: 600; font-size: 1.05em; }
     </style>
 </head>
-<body class="page-bg text-gray-800 pb-28">
+<body class="page-bg text-gray-800 pb-8">
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5SMC83MH" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
@@ -40,7 +128,9 @@
             </div>
         </div>
     </header>
+
     <main class="max-w-6xl mx-auto px-4 py-6">
+        <!-- Search -->
         <div class="max-w-xl mx-auto mb-6">
             <div class="flex gap-2">
                 <input type="text" id="si" placeholder="搜索歌曲、歌手..." class="flex-1 bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" onkeydown="if(event.key==='Enter')doSearch()">
@@ -57,12 +147,61 @@
                 <button onclick="qs('BTS')" class="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">BTS</button>
             </div>
         </div>
+
+        <!-- Tabs -->
         <div class="flex gap-2 mb-4 justify-center">
             <button onclick="showTab('results')" id="tR" class="tab-btn active px-4 py-1.5 rounded-full text-sm font-medium">🎵 音乐</button>
             <button onclick="showTab('playlist')" id="tP" class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600">📋 播放列表 <span id="pc">(0)</span></button>
         </div>
+
+        <!-- xymp3-style Player when song selected -->
+        <div id="playerBox" class="hidden mb-6">
+            <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col md:flex-row gap-6 items-center">
+                <!-- Left: rotating record -->
+                <div class="record-wrap flex-shrink-0">
+                    <div class="tonearm" id="tonearm"></div>
+                    <div class="record-ring"></div>
+                    <img id="recordImg" class="record-img" src="" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 160 160%22><rect fill=%22%23e0e7ff%22 width=%22160%22 height=%22160%22/><text x=%2280%22 y=%2295%22 text-anchor=%22middle%22 font-size=%2260%22>🎵</text></svg>'">
+                    <button onclick="toggle()" class="play-btn-disc">
+                        <svg id="iP2" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <svg id="iPa2" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    </button>
+                </div>
+                <!-- Right: info + lyrics -->
+                <div class="flex-1 min-w-0 w-full">
+                    <div class="mb-3">
+                        <h2 id="pT" class="text-xl font-bold truncate">未播放</h2>
+                        <p id="pA" class="text-sm text-gray-500 truncate">-</p>
+                    </div>
+                    <div class="flex items-center gap-3 mb-3">
+                        <span id="cT" class="text-xs text-gray-500 flex-shrink-0">0:00</span>
+                        <div class="flex-1 h-1.5 bg-gray-200 rounded-full cursor-pointer relative" onclick="seek(event)">
+                            <div id="pF" class="absolute left-0 top-0 h-full bg-indigo-500 rounded-full" style="width:0%;transition:width .1s linear"></div>
+                        </div>
+                        <span id="dT" class="text-xs text-gray-500 flex-shrink-0">0:00</span>
+                    </div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <button onclick="prev()" class="p-1.5 hover:bg-gray-100 rounded-full text-lg">⏮</button>
+                        <button onclick="toggle()" class="p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 text-lg" id="playBtn">▶</button>
+                        <button onclick="next()" class="p-1.5 hover:bg-gray-100 rounded-full text-lg">⏭</button>
+                        <div class="flex-1" />
+                        <span class="text-xs text-gray-400">🔊</span>
+                        <input type="range" class="vol w-20" min="0" max="100" value="80" oninput="au.volume=this.value/100">
+                    </div>
+                    <!-- Lyrics -->
+                    <div id="lrcBox" class="bg-gray-50 rounded-lg p-3 h-40 overflow-y-auto text-sm text-center text-gray-500 scroll-smooth">
+                        <div id="lrcContent">
+                            <p class="text-gray-400 italic">歌词将在播放时显示...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
         <div id="loading" class="hidden text-center py-12"><div class="inline-block w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div><p class="mt-3 text-gray-500 text-sm">搜索中...</p></div>
-        <div id="songLoading" class="hidden text-center py-4"><div class="inline-block w-6 h-6 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div><p class="mt-2 text-gray-400 text-xs">加载歌曲中...</p></div>
+
+        <!-- Results / Playlist -->
         <div id="rP"><div id="res" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div></div>
         <div id="pP" class="hidden">
             <div class="flex justify-between items-center mb-3"><span class="text-sm text-gray-500">已保存 <span id="pc2">0</span> 首</span><button onclick="clearPL()" class="text-xs text-red-500 hover:text-red-700">清空</button></div>
@@ -70,35 +209,29 @@
             <div id="ePL" class="text-center py-16 text-gray-400"><div class="text-5xl mb-3">📋</div><p>播放列表为空，点击 ❤️ 添加歌曲</p></div>
         </div>
     </main>
-    <!-- Player Bar -->
-    <div id="pBar" class="fixed bottom-0 left-0 right-0 border-t border-gray-200 shadow-lg z-50 hidden" style="backdrop-filter:blur(20px);background:rgba(245,244,238,.95)">
-        <div class="h-1.5 bg-gray-200 cursor-pointer" onclick="seek(event)"><div id="pF" class="h-full bg-indigo-500 rounded-r-full" style="width:0%;transition:width .1s linear"></div></div>
-        <div class="max-w-6xl mx-auto px-4 py-2.5 flex items-center gap-3">
-            <div class="w-11 h-11 rounded-lg bg-indigo-100 flex items-center justify-center text-xl flex-shrink-0">🎵</div>
-            <div class="min-w-0 flex-1"><div id="pT" class="text-sm font-medium truncate">未播放</div><div id="pA" class="text-xs text-gray-500 truncate">-</div></div>
-            <div class="flex items-center gap-2">
-                <button onclick="prev()" class="p-1.5 hover:bg-gray-100 rounded-full text-lg">⏮</button>
-                <button onclick="toggle()" class="p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 text-lg" id="playBtn">▶</button>
-                <button onclick="next()" class="p-1.5 hover:bg-gray-100 rounded-full text-lg">⏭</button>
-            </div>
-            <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500">
-                <span id="cT">0:00</span>/<span id="dT">0:00</span>
-                <input type="range" class="vol w-16" min="0" max="100" value="80" oninput="au.volume=this.value/100">
-            </div>
-        </div>
-    </div>
     <audio id="au" preload="auto"></audio>
+
     <script>
     const au = document.getElementById('au');
     let tracks = [], curIdx = -1;
     let pl = JSON.parse(localStorage.getItem('musicPL2') || '[]');
+    let lrcLines = []; // parsed [{time, text}]
+    let curLrcIdx = -1;
 
     function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-    function fmt(s){if(!s)return'-';const m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+String(sec).padStart(2,'0')}
+    function fmt(s){if(!s)return'0:00';const m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+String(sec).padStart(2,'0')}
     function qs(q){document.getElementById('si').value=q;doSearch()}
     function upc(){document.getElementById('pc').textContent='('+pl.length+')';document.getElementById('pc2').textContent=pl.length}
     function inPL(id){return pl.some(t=>t.id===id)}
-    function ub(p){document.getElementById('playBtn').textContent=p?'⏸':'▶'}
+    function ub(p){
+        document.getElementById('playBtn').textContent=p?'⏸':'▶';
+        document.getElementById('iP2').classList.toggle('hidden',p);
+        document.getElementById('iPa2').classList.toggle('hidden',!p);
+        const img=document.getElementById('recordImg');
+        if(p)img.classList.add('spinning');else img.classList.remove('spinning');
+        const arm=document.getElementById('tonearm');
+        if(p)arm.classList.add('playing');else arm.classList.remove('playing');
+    }
 
     async function doSearch(){
         const q=document.getElementById('si').value.trim();
@@ -136,28 +269,80 @@
         `).join('');
     }
 
+    // LRC parser
+    function parseLRC(lrc){
+        if(!lrc)return [];
+        const lines=[];
+        lrc.split('\n').forEach(ln=>{
+            const m=ln.match(/\[(\d{1,2}):(\d{1,2})(?:\.(\d{1,3}))?\](.*)/);
+            if(m){
+                const time=parseInt(m[1])*60+parseInt(m[2])+(m[3]?parseInt(m[3].padEnd(3,'0'))/1000:0);
+                const text=m[4].trim();
+                if(text)lines.push({time,text});
+            }
+        });
+        return lines.sort((a,b)=>a.time-b.time);
+    }
+
+    function renderLrc(){
+        const el=document.getElementById('lrcContent');
+        if(!lrcLines.length){
+            el.innerHTML='<p class="text-gray-400 italic">暂无歌词</p>';
+            return;
+        }
+        el.innerHTML=lrcLines.map((l,i)=>`<p class="lrc-line" data-idx="${i}">${esc(l.text)}</p>`).join('');
+    }
+
+    function updateLrc(){
+        if(!lrcLines.length)return;
+        const t=au.currentTime;
+        let idx=-1;
+        for(let i=0;i<lrcLines.length;i++){
+            if(lrcLines[i].time<=t)idx=i;else break;
+        }
+        if(idx===curLrcIdx)return;
+        curLrcIdx=idx;
+        const lines=document.querySelectorAll('.lrc-line');
+        lines.forEach(l=>l.classList.remove('active'));
+        if(idx>=0&&lines[idx]){
+            lines[idx].classList.add('active');
+            lines[idx].scrollIntoView({block:'center',behavior:'smooth'});
+        }
+    }
+
     async function playSong(i){
         if(i<0||i>=tracks.length)return;
         curIdx=i;
         const t=tracks[i];
-        document.getElementById('pBar').classList.remove('hidden');
+        document.getElementById('playerBox').classList.remove('hidden');
         document.getElementById('pT').textContent=t.title;
         document.getElementById('pA').textContent=t.artist;
-        document.getElementById('songLoading').classList.remove('hidden');
+        document.getElementById('recordImg').style.opacity='0.5';
+        document.getElementById('lrcContent').innerHTML='<p class="text-gray-400 italic">加载中...</p>';
         renderTracks();
         try{
             const r=await fetch('/api/music/detail?id='+encodeURIComponent(t.id));
             const d=await r.json();
-            document.getElementById('songLoading').classList.add('hidden');
             if(d.code!==200||!d.data)throw new Error('Detail failed');
-            const url=d.data.music_mp3Url||d.data.mp3Url||d.data.music_flacUrl||'';
+            const ad=d.data;
+            // Set cover
+            if(ad.cover||ad.song_cover||ad.mp3_cover){
+                const img=document.getElementById('recordImg');
+                img.src=ad.cover||ad.song_cover||ad.mp3_cover;
+                img.style.opacity='1';
+            }
+            // Set audio URL
+            const url=ad.music_mp3Url||ad.mp3Url||ad.music_flacUrl||ad.flacUrl||'';
             if(!url)throw new Error('No audio URL');
             au.src=url;
             au.volume=document.querySelector('.vol')?.value/100||0.8;
             au.play().catch(()=>{});
             ub(true);
+            // Parse LRC
+            lrcLines=parseLRC(ad.lrc||ad.lyrics||'');
+            curLrcIdx=-1;
+            renderLrc();
         }catch(e){
-            document.getElementById('songLoading').classList.add('hidden');
             console.error('Play error:',e);
             document.getElementById('pT').textContent='播放失败: '+t.title;
             ub(false);
@@ -169,7 +354,13 @@
     function prev(){if(curIdx>0)playSong(curIdx-1)}
     function seek(e){if(!au.duration)return;const r=e.currentTarget.getBoundingClientRect();au.currentTime=(e.clientX-r.left)/r.width*au.duration}
 
-    au.addEventListener('timeupdate',()=>{if(!au.duration)return;document.getElementById('pF').style.width=(au.currentTime/au.duration*100)+'%';document.getElementById('cT').textContent=fmt(au.currentTime);document.getElementById('dT').textContent=fmt(au.duration)});
+    au.addEventListener('timeupdate',()=>{
+        if(!au.duration)return;
+        document.getElementById('pF').style.width=(au.currentTime/au.duration*100)+'%';
+        document.getElementById('cT').textContent=fmt(au.currentTime);
+        document.getElementById('dT').textContent=fmt(au.duration);
+        updateLrc();
+    });
     au.addEventListener('ended',()=>{ub(false);next()});
     au.addEventListener('pause',()=>ub(false));
     au.addEventListener('play',()=>ub(true));
@@ -208,7 +399,7 @@
         if(t==='playlist')renderPL();
     }
 
-    // Load trending on init
+    // Load chart on init
     upc();
     (async function(){
         try{
