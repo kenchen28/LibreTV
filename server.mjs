@@ -121,9 +121,14 @@ app.get('/api/music/:action', async (req, res) => {
       if (!q) return res.status(400).json({ error: 'Missing q param' });
       const resp = await axios.get(`${base}/search?page=${page}&keyword=${encodeURIComponent(q)}`, { timeout: 10000, headers: { 'User-Agent': ua, 'Referer': base + '/' } });
       const html = resp.data;
-      const regex = /href="\/music\/info\.html\?id=(MUSIC_[0-9]+)"[^>]*>[\s\S]*?<div class="song_info2"[^>]*>\s*<div>([^<]+)<\/div>/g;
-      const results = []; let m;
+      // Match href links to /music/info.html?id=MUSIC_xxx followed somewhere later by the song_info2 div containing title - artist
+      const regex = /href="\/music\/info\.html\?id=(MUSIC_[0-9]+)"[\s\S]*?<div class="song_info2"[^>]*>\s*<div>\s*([^<]+?)\s*<\/div>/g;
+      const results = [];
+      const seen = new Set();
+      let m;
       while ((m = regex.exec(html)) !== null) {
+        if (seen.has(m[1])) continue;
+        seen.add(m[1]);
         const parts = m[2].trim().split(' - ');
         results.push({ id: m[1], title: parts[0] || m[2].trim(), artist: parts.slice(1).join(' - ') || '' });
       }

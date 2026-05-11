@@ -241,32 +241,49 @@
         document.getElementById('res').innerHTML='';
         try{
             const r=await fetch('/api/music/search?q='+encodeURIComponent(q));
+            if(!r.ok){
+                const errText = await r.text();
+                console.error('Search API error',r.status,errText);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('res').innerHTML='<div class="col-span-full text-center py-16 text-gray-400"><p>搜索失败 (HTTP '+r.status+')</p><p class="text-xs mt-2">Server: '+esc(errText.slice(0,200))+'</p></div>';
+                return;
+            }
             const d=await r.json();
-            tracks=d.data||[];
+            console.log('Search result:',d);
+            tracks=Array.isArray(d)?d:(d.data||d.list||[]);
             document.getElementById('loading').classList.add('hidden');
             if(!tracks.length){document.getElementById('res').innerHTML='<div class="col-span-full text-center py-16 text-gray-400">😔 没有找到结果</div>';return}
             renderTracks();
         }catch(e){
+            console.error('Search error:',e);
             document.getElementById('loading').classList.add('hidden');
-            document.getElementById('res').innerHTML='<div class="col-span-full text-center py-16 text-gray-400">搜索失败</div>';
+            document.getElementById('res').innerHTML='<div class="col-span-full text-center py-16 text-gray-400"><p>搜索失败</p><p class="text-xs mt-2">'+esc(e.message||'Unknown error')+'</p></div>';
         }
     }
 
     function renderTracks(){
-        document.getElementById('res').innerHTML=tracks.map((t,i)=>`
+        if(!tracks.length){
+            document.getElementById('res').innerHTML='<div class="col-span-full text-center py-16 text-gray-400">🎵 暂无音乐</div>';
+            return;
+        }
+        document.getElementById('res').innerHTML=tracks.map((t,i)=>{
+            const title=t.title||t.name||t.mp3_title||'Unknown';
+            const artist=t.artist||t.singer||t.mp3_author||'';
+            const id=t.id||t.mp3_id||('idx_'+i);
+            return `
             <div class="mc border border-gray-200 rounded-lg p-3 bg-white ${curIdx===i?'now-playing':''}" onclick="playSong(${i})">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-lg flex-shrink-0">
                         ${curIdx===i?'<span class="eq"><span></span><span></span><span></span><span></span></span>':'🎵'}
                     </div>
                     <div class="min-w-0 flex-1">
-                        <div class="text-sm font-medium truncate">${esc(t.title)}</div>
-                        <div class="text-xs text-gray-500 truncate">${esc(t.artist)}</div>
+                        <div class="text-sm font-medium truncate">${esc(title)}</div>
+                        <div class="text-xs text-gray-500 truncate">${esc(artist)}</div>
                     </div>
-                    <button onclick="event.stopPropagation();tglPL(${i})" class="p-1.5 rounded-full hover:bg-gray-100 text-lg">${inPL(t.id)?'❤️':'🤍'}</button>
+                    <button onclick="event.stopPropagation();tglPL(${i})" class="p-1.5 rounded-full hover:bg-gray-100 text-lg">${inPL(id)?'❤️':'🤍'}</button>
                 </div>
             </div>
-        `).join('');
+        `;}).join('');
     }
 
     // LRC parser
