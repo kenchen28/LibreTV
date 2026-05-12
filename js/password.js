@@ -223,6 +223,38 @@ async function handlePasswordSubmit() {
 }
 
 /**
+ * 检查 URL 参数中是否有 code，如果有则自动填充并提交
+ */
+async function tryAutoSubmitFromUrl() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        if (!code) return false;
+
+        const passwordInput = document.getElementById('passwordInput');
+        if (passwordInput) passwordInput.value = code;
+
+        const ok = await verifyPassword(code);
+        if (ok) {
+            hidePasswordModal();
+            document.dispatchEvent(new CustomEvent('passwordVerified'));
+            // 清理 URL 中的 code 参数，避免刷新后泄露
+            try {
+                params.delete('code');
+                const newSearch = params.toString();
+                const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '') + window.location.hash;
+                window.history.replaceState({}, document.title, newUrl);
+            } catch (_) {}
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('Auto-submit from URL failed:', e);
+        return false;
+    }
+}
+
+/**
  * 初始化密码验证系统
  */
 function initPasswordProtection() {
@@ -231,9 +263,17 @@ function initPasswordProtection() {
         showPasswordModal();
         return;
     }
-    
-    // 如果设置了密码但用户未验证，显示密码输入框
+
+    // 如果设置了密码但用户未验证，尝试从 URL 参数自动验证
     if (isPasswordProtected() && !isPasswordVerified()) {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('code')) {
+            // 先尝试自动提交；失败时回退显示密码框
+            tryAutoSubmitFromUrl().then((ok) => {
+                if (!ok) showPasswordModal();
+            });
+            return;
+        }
         showPasswordModal();
         return;
     }
