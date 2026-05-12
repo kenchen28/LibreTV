@@ -67,10 +67,6 @@
                     <div class="border-l border-gray-300 h-6 mx-1"></div>
                     <button onclick="toggleHistory(event)" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">观看历史</button>
                     <button onclick="toggleSettings(event)" class="px-3 py-1.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all">设置</button>
-                    <div class="border-l border-gray-300 h-6 mx-1"></div>
-                    <button onclick="changeLanguage('en')" id="lang-en" class="px-3 py-1.5 rounded-md font-medium transition-all text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">EN</button>
-                    <button onclick="changeLanguage('zh-CN')" id="lang-zh-CN" class="px-3 py-1.5 rounded-md font-medium transition-all text-sm bg-indigo-600 text-white">简体</button>
-                    <button onclick="changeLanguage('zh-TW')" id="lang-zh-TW" class="px-3 py-1.5 rounded-md font-medium transition-all text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900">繁體</button>
                 </nav>
             </div>
 
@@ -87,16 +83,10 @@
                     <button onclick="document.getElementById('helpModal').classList.remove('hidden')" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">使用说明</button>
                     <button onclick="toggleHistory(event)" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">观看历史</button>
                     <button onclick="toggleSettings(event)" class="mx-4 px-4 py-2.5 rounded-md font-medium text-sm text-gray-500 hover:bg-gray-100 transition-all text-center">设置</button>
-                    <div class="flex gap-2 px-4 pt-1 justify-center">
-                        <button onclick="changeLanguage('en')" class="lang-mobile-btn px-3 py-1.5 rounded-md font-medium transition-all text-sm text-gray-500 hover:bg-gray-100" data-lang="en">EN</button>
-                        <button onclick="changeLanguage('zh-CN')" class="lang-mobile-btn px-3 py-1.5 rounded-md font-medium transition-all text-sm bg-indigo-600 text-white" data-lang="zh-CN">简体</button>
-                        <button onclick="changeLanguage('zh-TW')" class="lang-mobile-btn px-3 py-1.5 rounded-md font-medium transition-all text-sm text-gray-500 hover:bg-gray-100" data-lang="zh-TW">繁體</button>
-                    </div>
                 </div>
             </div>
 
-            <!-- Google Translate element - always in DOM, hidden -->
-            <div id="google_translate_element_hidden" class="hidden"></div>
+            <!-- End of nav -->
         </div>
     </header>
 
@@ -580,102 +570,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Google Translate -->
-    <script>
-    (function() {
-        var currentLanguage = (function() {
-            var lang = navigator.language || 'zh-CN';
-            if (lang.startsWith('zh-TW') || lang === 'zh-Hant') return 'zh-TW';
-            return 'zh-CN';
-        })();
-
-        // Update button styles on load
-        updateLangButtons(currentLanguage);
-
-        window.googleTranslateElementInit = function() {
-            if (window.google && window.google.translate) {
-                new window.google.translate.TranslateElement({
-                    pageLanguage: 'en',
-                    includedLanguages: 'zh-CN,zh-TW,en',
-                    autoDisplay: false
-                }, 'google_translate_element_hidden');
-            }
-        };
-
-        // Auto-apply browser language
-        if (currentLanguage !== 'en') {
-            var autoInterval = setInterval(function() {
-                var select = document.querySelector('.goog-te-combo');
-                if (select) {
-                    select.value = currentLanguage;
-                    select.dispatchEvent(new Event('change'));
-                    clearInterval(autoInterval);
-                }
-            }, 500);
-            setTimeout(function() { clearInterval(autoInterval); }, 10000);
-        }
-
-        // Load Google Translate script
-        var script = document.createElement('script');
-        script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-        script.async = true;
-        document.body.appendChild(script);
-
-        window.changeLanguage = function(langCode) {
-            currentLanguage = langCode;
-            updateLangButtons(langCode);
-
-            var interval = setInterval(function() {
-                var select = document.querySelector('.goog-te-combo');
-                if (select) {
-                    select.value = langCode;
-                    select.dispatchEvent(new Event('change'));
-                    clearInterval(interval);
-
-                    if (langCode === 'zh-CN' || langCode === 'zh-TW') {
-                        setTimeout(function() {
-                            var checkFrame = setInterval(function() {
-                                var frame = document.querySelector('.goog-te-banner-frame');
-                                if (frame && window.getComputedStyle(frame).display !== 'none') {
-                                    document.body.style.paddingTop = '40px';
-                                    clearInterval(checkFrame);
-                                }
-                            }, 100);
-                            setTimeout(function() { clearInterval(checkFrame); }, 3000);
-                        }, 500);
-                    } else {
-                        document.body.style.paddingTop = '0';
-                    }
-                }
-            }, 100);
-            setTimeout(function() { clearInterval(interval); }, 5000);
-        };
-
-        function updateLangButtons(lang) {
-            var langs = ['en', 'zh-CN', 'zh-TW'];
-            langs.forEach(function(l) {
-                var btn = document.getElementById('lang-' + l);
-                if (btn) {
-                    if (l === lang) {
-                        btn.className = 'px-3 py-1.5 rounded-md font-medium transition-all text-sm bg-indigo-600 text-white';
-                    } else {
-                        btn.className = 'px-3 py-1.5 rounded-md font-medium transition-all text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900';
-                    }
-                }
-                // Mobile buttons
-                var mobileBtns = document.querySelectorAll('.lang-mobile-btn[data-lang="' + l + '"]');
-                mobileBtns.forEach(function(mb) {
-                    if (l === lang) {
-                        mb.className = 'lang-mobile-btn px-3 py-1.5 rounded-md font-medium transition-all text-sm bg-indigo-600 text-white';
-                    } else {
-                        mb.className = 'lang-mobile-btn px-3 py-1.5 rounded-md font-medium transition-all text-sm text-gray-500 hover:bg-gray-100';
-                    }
-                });
-            });
-        }
-    })();
-    </script>
 
     <!-- 添加弹窗和URL搜索参数处理脚本 -->
     <script src="js/index-page.js"></script>
