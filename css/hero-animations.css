@@ -112,6 +112,8 @@ header, main, .container, footer {
 .hero-title {
     display: inline-flex;
     line-height: 1;
+    /* Fallback color so text is visible even before the shimmer gradient kicks in */
+    color: #4f46e5;
 }
 
 .hero-title .letter {
@@ -121,6 +123,26 @@ header, main, .container, footer {
     animation: letter-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     transform-origin: bottom center;
     will-change: transform, opacity;
+    /* Each letter carries its own gradient so background-clip:text clips
+       per-character (parent-level clipping doesn't reach inline children). */
+    background: linear-gradient(
+        100deg,
+        #4f46e5 0%,
+        #6366f1 30%,
+        #c084fc 50%,
+        #6366f1 70%,
+        #4f46e5 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-title.shimmer .letter {
+    animation:
+        letter-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+        shimmer-sweep 6s linear 1.6s infinite;
 }
 
 .hero-title .letter:nth-child(1) { animation-delay: 0.30s; }
@@ -136,24 +158,7 @@ header, main, .container, footer {
     100% { opacity: 1; transform: translateY(0)    rotateX(0)      scale(1); }
 }
 
-/* Continuous shimmer sweep on the gradient title — kicks in after intro */
-.hero-title.shimmer {
-    background: linear-gradient(
-        100deg,
-        #4f46e5 0%,
-        #6366f1 30%,
-        #c084fc 50%,
-        #6366f1 70%,
-        #4f46e5 100%
-    );
-    background-size: 200% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-    animation: shimmer-sweep 6s linear infinite;
-    animation-delay: 1.6s;
-}
+/* Continuous shimmer sweep — applied per-letter (see .hero-title.shimmer .letter above) */
 
 @keyframes shimmer-sweep {
     0%   { background-position: 200% 50%; }
@@ -304,7 +309,7 @@ header, main, .container, footer {
     .hero-particles span,
     .hero-logo-icon,
     .hero-title .letter,
-    .hero-title.shimmer,
+    .hero-title.shimmer .letter,
     .hero-tagline,
     #searchArea,
     #searchArea > div > div:first-child::before,
@@ -314,7 +319,13 @@ header, main, .container, footer {
         transition: none !important;
     }
     .hero-logo-icon { transform: none; opacity: 1; }
-    .hero-title .letter { opacity: 1; transform: none; }
+    .hero-title .letter {
+        opacity: 1;
+        transform: none;
+        background: none;
+        -webkit-text-fill-color: currentColor;
+        color: #4f46e5;
+    }
     .hero-tagline { width: auto; opacity: 1; border: 0; }
     .reveal { opacity: 1; transform: none; }
 }
