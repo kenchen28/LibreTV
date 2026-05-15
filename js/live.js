@@ -63,6 +63,81 @@ let currentChannel = null;
 let hlsInstance = null;
 let currentSourceIndex = 0;
 
+// ── Bookmarks (persisted to localStorage) ──
+const BOOKMARK_KEY = 'liveTvBookmarks';
+const BOOKMARK_CATEGORY = '★ 收藏';
+
+function loadBookmarks() {
+    try {
+        const raw = localStorage.getItem(BOOKMARK_KEY);
+        return raw ? JSON.parse(raw) : [];
+    } catch {
+        return [];
+    }
+}
+
+function saveBookmarks(list) {
+    try {
+        localStorage.setItem(BOOKMARK_KEY, JSON.stringify(list));
+    } catch (e) {
+        console.error('保存收藏失败:', e);
+    }
+}
+
+// Use channel URL as the unique identifier
+function bookmarkKey(ch) {
+    return ch.url;
+}
+
+function isBookmarked(ch) {
+    const list = loadBookmarks();
+    const key = bookmarkKey(ch);
+    return list.some(b => b.url === key);
+}
+
+function toggleBookmark(index, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    const ch = filteredChannels[index];
+    if (!ch) return;
+
+    const list = loadBookmarks();
+    const key = bookmarkKey(ch);
+    const existing = list.findIndex(b => b.url === key);
+
+    if (existing >= 0) {
+        list.splice(existing, 1);
+    } else {
+        list.push({
+            name: ch.name,
+            url: ch.url,
+            group: ch.group,
+            logo: ch.logo || '',
+            addedAt: Date.now(),
+        });
+    }
+    saveBookmarks(list);
+
+    // Re-render categories so the 收藏 tab appears/disappears
+    renderCategories();
+    // Restore active state on the right tab
+    const activeTab = document.querySelector('.category-tab.active');
+    const cat = activeTab ? activeTab.textContent : '全部';
+    if (cat === BOOKMARK_CATEGORY) {
+        filterChannels(BOOKMARK_CATEGORY);
+    } else {
+        // Make sure the previously active category is still highlighted
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.textContent === cat);
+        });
+        renderChannelList();
+    }
+}
+
+window.toggleBookmark = toggleBookmark;
+
 // Fetch with timeout (compatible with older browsers)
 function fetchWithTimeout(url, timeoutMs = 15000) {
     return new Promise((resolve, reject) => {
@@ -203,7 +278,12 @@ async function loadCustomM3U() {
 function getCategories() {
     const cats = new Set();
     allChannels.forEach(ch => cats.add(ch.group));
-    return ['全部', ...Array.from(cats).sort()];
+    const list = ['全部', ...Array.from(cats).sort()];
+    // Show bookmarks tab whenever the user has any saved
+    if (loadBookmarks().length > 0) {
+        list.splice(1, 0, BOOKMARK_CATEGORY);
+    }
+    return list;
 }
 
 // Render category tabs
@@ -223,11 +303,21 @@ function filterChannels(category) {
 
     const searchQuery = (document.getElementById('channelSearch')?.value || '').toLowerCase();
 
-    filteredChannels = allChannels.filter(ch => {
-        const matchCategory = category === '全部' || ch.group === category;
-        const matchSearch = !searchQuery || ch.name.toLowerCase().includes(searchQuery);
-        return matchCategory && matchSearch;
-    });
+    if (category === BOOKMARK_CATEGORY) {
+        // Show all bookmarks (across sources) — fall back to bookmark data
+        // when the channel isn't in the currently loaded source.
+        const bookmarks = loadBookmarks();
+        const channelByUrl = new Map(allChannels.map(c => [c.url, c]));
+        filteredChannels = bookmarks
+            .map(b => channelByUrl.get(b.url) || { name: b.name, url: b.url, group: b.group || '收藏', logo: b.logo || '' })
+            .filter(ch => !searchQuery || ch.name.toLowerCase().includes(searchQuery));
+    } else {
+        filteredChannels = allChannels.filter(ch => {
+            const matchCategory = category === '全部' || ch.group === category;
+            const matchSearch = !searchQuery || ch.name.toLowerCase().includes(searchQuery);
+            return matchCategory && matchSearch;
+        });
+    }
 
     renderChannelList();
 }
@@ -236,16 +326,24 @@ function filterChannels(category) {
 function renderChannelList() {
     const container = document.getElementById('channelList');
     if (filteredChannels.length === 0) {
-        container.innerHTML = '<div class="channel-loading">没有匹配的频道</div>';
+        const activeTab = document.querySelector('.category-tab.active');
+        const cat = activeTab ? activeTab.textContent : '';
+        container.innerHTML = cat === BOOKMARK_CATEGORY
+            ? '<div class="channel-loading">还没有收藏的频道，点击频道右侧的 ☆ 按钮添加</div>'
+            : '<div class="channel-loading">没有匹配的频道</div>';
         return;
     }
 
-    container.innerHTML = filteredChannels.map((ch, idx) =>
-        `<div class="channel-item ${currentChannel && currentChannel.url === ch.url ? 'active' : ''}" onclick="playChannel(${idx})">
-            <span class="channel-name">${ch.name}</span>
-            <span class="channel-badge">${ch.group}</span>
-        </div>`
-    ).join('');
+    const escape = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+    container.innerHTML = filteredChannels.map((ch, idx) => {
+        const fav = isBookmarked(ch);
+        return `<div class="channel-item ${currentChannel && currentChannel.url === ch.url ? 'active' : ''}" onclick="playChannel(${idx})">
+            <span class="channel-name">${escape(ch.name)}</span>
+            <span class="channel-badge">${escape(ch.group)}</span>
+            <button class="bookmark-btn ${fav ? 'is-fav' : ''}" onclick="toggleBookmark(${idx}, event)" aria-label="${fav ? '取消收藏' : '收藏'}" title="${fav ? '取消收藏' : '收藏'}">${fav ? '★' : '☆'}</button>
+        </div>`;
+    }).join('');
 }
 
 // Play a channel

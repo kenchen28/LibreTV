@@ -111,6 +111,51 @@
     color: white;
 }
 
+/* Bookmark (favorite) button */
+.bookmark-btn {
+    margin-left: 8px;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: transparent;
+    border: 0;
+    color: #9ca3af;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s, transform 0.1s;
+    flex: none;
+}
+
+.bookmark-btn:hover {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.bookmark-btn.is-fav {
+    color: #f59e0b;
+}
+
+.bookmark-btn:active {
+    transform: scale(0.9);
+}
+
+.channel-item.active .bookmark-btn {
+    color: rgba(255,255,255,0.7);
+}
+
+.channel-item.active .bookmark-btn.is-fav {
+    color: #fbbf24;
+}
+
+.channel-item.active .bookmark-btn:hover {
+    background: rgba(255,255,255,0.15);
+    color: #fbbf24;
+}
+
 .live-player-area {
     flex: 1;
     display: flex;
