@@ -148,15 +148,57 @@ function showPasswordModal() {
 
         // 只有在非强制设置密码模式下才聚焦输入框
         if (!isPasswordRequired()) {
-            // 确保输入框获取焦点
+            // 确保输入框获取焦点，同时给浏览器/密码管理器机会自动填充
             setTimeout(() => {
                 const passwordInput = document.getElementById('passwordInput');
                 if (passwordInput) {
                     passwordInput.focus();
+                    // 监听自动填充：当浏览器写入值后自动提交
+                    watchAutofill(passwordInput);
                 }
             }, 100);
         }
     }
+}
+
+/**
+ * 监听密码输入框的自动填充，在检测到值时自动提交一次
+ */
+function watchAutofill(input) {
+    if (!input || input.dataset.autofillWatched === '1') return;
+    input.dataset.autofillWatched = '1';
+
+    let attempts = 0;
+    const maxAttempts = 30; // ~3 秒 (30 * 100ms)
+    const start = () => {
+        const tick = setInterval(async () => {
+            attempts++;
+            const v = input.value;
+            if (v && v.length > 0) {
+                clearInterval(tick);
+                // 尝试用自动填充的值进行验证
+                const ok = await verifyPassword(v);
+                if (ok) {
+                    hidePasswordModal();
+                    document.dispatchEvent(new CustomEvent('passwordVerified'));
+                }
+                return;
+            }
+            if (attempts >= maxAttempts) clearInterval(tick);
+        }, 100);
+    };
+    start();
+
+    // 用户/管理器手动触发的输入也会走 form submit，但保留 change 事件作为备份
+    input.addEventListener('change', async () => {
+        const v = input.value;
+        if (!v) return;
+        const ok = await verifyPassword(v);
+        if (ok) {
+            hidePasswordModal();
+            document.dispatchEvent(new CustomEvent('passwordVerified'));
+        }
+    }, { once: true });
 }
 
 /**
