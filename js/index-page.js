@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.setItem('hasSeenDisclaimer', 'true');
             // 隐藏弹窗
             disclaimerModal.style.display = 'none';
+            // 刷新页面，让密码管理器在干净的页面状态下识别登录表单并触发自动填充
+            window.location.reload();
         });
     }
 
