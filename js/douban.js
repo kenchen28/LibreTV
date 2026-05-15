@@ -614,11 +614,6 @@ async function renderDoubanCards(data, container, append = false) {
                     <div class="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm">
                         <span class="text-yellow-400">★</span> ${safeRate}
                     </div>
-                    <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm hover:bg-[#e5e4de] transition-colors">
-                        <a href="${item.url}" target="_blank" rel="noopener noreferrer" title="在豆瓣查看" onclick="event.stopPropagation();">
-                            🔗
-                        </a>
-                    </div>
                 </div>
                 <div class="p-2 text-center bg-[#f5f4ee]">
                     <button onclick="fillAndSearchWithDouban('${safeTitle}')"
