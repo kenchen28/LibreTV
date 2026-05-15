@@ -34,6 +34,7 @@
     <script src="libs/tailwindcss.min.js"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/hero-animations.css">
 </head>
 <body class="page-bg text-gray-800">
     <!-- Google Tag Manager (noscript) -->
@@ -251,16 +252,22 @@
     <div class="container mx-auto px-4 py-8 flex flex-col h-screen">
         <div class="flex-1 flex flex-col">
             <!-- 网站标志和口号 -->
-            <header class="text-center mb-2">
+            <header class="text-center mb-2 relative">
+                <div class="hero-particles" aria-hidden="true">
+                    <span></span><span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
                 <div class="flex justify-center items-center mb-4">
-                    <a href="#" onclick="resetToHome(); return false;" class="flex items-center">
-                        <svg class="w-10 h-10 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="#" onclick="resetToHome(); return false;" class="hero-logo-link">
+                        <svg class="hero-logo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                         </svg>
-                        <h1 class="text-5xl font-bold gradient-text">优点TV</h1>
+                        <h1 class="hero-title shimmer text-5xl font-bold" aria-label="优点TV">
+                            <span class="letter">优</span><span class="letter">点</span><span class="letter">T</span><span class="letter">V</span>
+                        </h1>
                     </a>
                 </div>
-                <p class="text-gray-500 mb-8">自由观影，畅享精彩</p>
+                <p class="hero-tagline text-gray-500 mb-8">自由观影，畅享精彩</p>
             </header>
             
 

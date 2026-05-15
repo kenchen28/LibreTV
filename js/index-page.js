@@ -80,3 +80,61 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 300);
     }
 });
+
+
+// ── Reveal-on-scroll for cards & sections ──
+// Adds the .reveal animation class to douban / search results as they enter view,
+// with a small stagger so cards cascade nicely. Pure progressive enhancement —
+// nothing breaks if IntersectionObserver isn't supported.
+(function () {
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) return;
+
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry, i) => {
+            if (!entry.isIntersecting) return;
+            const el = entry.target;
+            // Stagger by element index within its parent for a nice cascade
+            const parent = el.parentElement;
+            const idx = parent ? Array.prototype.indexOf.call(parent.children, el) : 0;
+            el.style.transitionDelay = Math.min(idx * 60, 600) + 'ms';
+            el.classList.add('in-view');
+            io.unobserve(el);
+        });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+
+    function tagAndObserve(scope) {
+        const containers = (scope || document).querySelectorAll(
+            '#douban-results, #results, #recentSearches'
+        );
+        containers.forEach((c) => {
+            c.querySelectorAll(':scope > *').forEach((child) => {
+                if (!child.classList.contains('reveal')) {
+                    child.classList.add('reveal');
+                    io.observe(child);
+                }
+            });
+        });
+    }
+
+    // Initial pass
+    document.addEventListener('DOMContentLoaded', () => tagAndObserve());
+
+    // Re-apply when the douban grid or results refresh (they replace innerHTML)
+    const watch = () => {
+        const targets = ['douban-results', 'results', 'recentSearches']
+            .map(id => document.getElementById(id))
+            .filter(Boolean);
+        targets.forEach(t => {
+            const mo = new MutationObserver(() => tagAndObserve(t.parentElement));
+            mo.observe(t, { childList: true });
+        });
+    };
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', watch);
+    } else {
+        watch();
+    }
+})();
