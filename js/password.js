@@ -264,29 +264,47 @@ async function handlePasswordSubmit() {
     }
 }
 
+// 支持的 URL 参数别名，按优先级排序
+const URL_PASSWORD_PARAMS = ['code', 'password', 'pwd', 'p'];
+
 /**
- * 检查 URL 参数中是否有 code，如果有则自动填充并提交
+ * 从 URL 查询参数中读取密码（支持 code/password/pwd/p）
+ */
+function readPasswordFromUrl() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        for (const key of URL_PASSWORD_PARAMS) {
+            const v = params.get(key);
+            if (v) return { key, value: v, params };
+        }
+    } catch (_) {}
+    return null;
+}
+
+/**
+ * 检查 URL 参数中是否有密码，如果有则自动填充并提交
  */
 async function tryAutoSubmitFromUrl() {
     try {
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get('code');
-        if (!code) return false;
+        const found = readPasswordFromUrl();
+        if (!found) return false;
 
         const passwordInput = document.getElementById('passwordInput');
-        if (passwordInput) passwordInput.value = code;
+        if (passwordInput) passwordInput.value = found.value;
 
-        const ok = await verifyPassword(code);
+        const ok = await verifyPassword(found.value);
+
+        // 无论成功与否，都从 URL 中移除密码参数，避免泄露与刷新重试
+        try {
+            URL_PASSWORD_PARAMS.forEach(k => found.params.delete(k));
+            const newSearch = found.params.toString();
+            const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '') + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
+        } catch (_) {}
+
         if (ok) {
             hidePasswordModal();
             document.dispatchEvent(new CustomEvent('passwordVerified'));
-            // 清理 URL 中的 code 参数，避免刷新后泄露
-            try {
-                params.delete('code');
-                const newSearch = params.toString();
-                const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '') + window.location.hash;
-                window.history.replaceState({}, document.title, newUrl);
-            } catch (_) {}
             return true;
         }
         return false;
@@ -308,8 +326,7 @@ function initPasswordProtection() {
 
     // 如果设置了密码但用户未验证，尝试从 URL 参数自动验证
     if (isPasswordProtected() && !isPasswordVerified()) {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('code')) {
+        if (readPasswordFromUrl()) {
             // 先尝试自动提交；失败时回退显示密码框
             tryAutoSubmitFromUrl().then((ok) => {
                 if (!ok) showPasswordModal();
