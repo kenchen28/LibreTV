@@ -1,400 +1,247 @@
-// 优点热门电影电视剧推荐功能
+// 首页如意资源最新影视推荐
+// 保留旧的 douban* DOM ID 和 localStorage 键，避免破坏已有用户设置。
 
-// 豆瓣标签列表 - 修改为默认标签
-let defaultMovieTags = ['热门', '最新', '经典', '豆瓣高分', '冷门佳片', '华语', '欧美', '韩国', '日本', '动作', '喜剧', '日综', '爱情', '科幻', '悬疑', '恐怖', '治愈'];
-let defaultTvTags = ['热门', '美剧', '英剧', '韩剧', '日剧', '国产剧', '港剧', '日本动画', '综艺', '纪录片'];
+const RUYI_SOURCE_ID = 'ruyi';
+const RUYI_FEED_BATCH_SIZE = 16;
+const RUYI_REQUEST_TIMEOUT = 10000;
+const RUYI_MAX_REQUEST_ATTEMPTS = 2;
+const RUYI_RETRY_BASE_DELAY = 1000;
+const RUYI_CACHE_BUCKET_MS = 5 * 60 * 1000;
+const RUYI_COVER_HOST_SUFFIX = 'ry-pic.com';
 
-// 用户标签列表 - 存储用户实际使用的标签（包含保留的系统标签和用户添加的自定义标签）
-let movieTags = [];
-let tvTags = [];
-
-// 加载用户标签
-function loadUserTags() {
-    try {
-        // 尝试从本地存储加载用户保存的标签
-        const savedMovieTags = localStorage.getItem('userMovieTags');
-        const savedTvTags = localStorage.getItem('userTvTags');
-        
-        // 如果本地存储中有标签数据，则使用它
-        if (savedMovieTags) {
-            movieTags = JSON.parse(savedMovieTags);
-        } else {
-            // 否则使用默认标签
-            movieTags = [...defaultMovieTags];
-        }
-        
-        if (savedTvTags) {
-            tvTags = JSON.parse(savedTvTags);
-        } else {
-            // 否则使用默认标签
-            tvTags = [...defaultTvTags];
-        }
-    } catch (e) {
-        console.error('加载标签失败：', e);
-        // 初始化为默认值，防止错误
-        movieTags = [...defaultMovieTags];
-        tvTags = [...defaultTvTags];
-    }
-}
-
-// 保存用户标签
-function saveUserTags() {
-    try {
-        localStorage.setItem('userMovieTags', JSON.stringify(movieTags));
-        localStorage.setItem('userTvTags', JSON.stringify(tvTags));
-    } catch (e) {
-        console.error('保存标签失败：', e);
-        showToast('保存标签失败', 'error');
-    }
-}
+// 如意资源的父分类不会自动包含子分类，因此“全部”使用多个分类流合并排序。
+// 伦理片（type_id 34）不会出现在首页推荐中。
+const RUYI_CATEGORY_GROUPS = {
+    movie: [
+        { label: '全部', typeIds: [6, 7, 8, 9, 10, 11, 12, 20, 45, 47] },
+        { label: '动作', typeIds: [6] },
+        { label: '喜剧', typeIds: [7] },
+        { label: '爱情', typeIds: [8] },
+        { label: '科幻', typeIds: [9] },
+        { label: '恐怖', typeIds: [10] },
+        { label: '剧情', typeIds: [11] },
+        { label: '战争', typeIds: [12] },
+        { label: '纪录片', typeIds: [20] },
+        { label: '动画电影', typeIds: [47] }
+    ],
+    tv: [
+        { label: '全部', typeIds: [13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 46] },
+        { label: '国产剧', typeIds: [13] },
+        { label: '香港剧', typeIds: [14] },
+        { label: '台湾剧', typeIds: [21] },
+        { label: '韩国剧', typeIds: [15] },
+        { label: '日本剧', typeIds: [22] },
+        { label: '欧美剧', typeIds: [16] },
+        { label: '海外剧', typeIds: [23, 24] },
+        { label: '短剧', typeIds: [46] },
+        { label: '综艺', typeIds: [25, 26, 27, 28] },
+        { label: '动漫', typeIds: [29, 30, 31, 32, 33] }
+    ]
+};
 
 let doubanMovieTvCurrentSwitch = 'movie';
-let doubanCurrentTag = '热门';
-let doubanPageStart = 0;
-const doubanPageSize = 16; // 一次显示的项目数量
-let doubanLoading = false; // 防止重复加载
-let doubanNoMore = false; // 没有更多数据
-let doubanObserver = null; // IntersectionObserver for infinite scroll
+let doubanCurrentCategory = RUYI_CATEGORY_GROUPS.movie[0];
+let doubanLoading = false;
+let doubanNoMore = false;
+let doubanObserver = null;
+let doubanInitialized = false;
+let ruyiFeedGeneration = 0;
+let ruyiStreams = [];
+let ruyiSeenVodIds = new Set();
 
-// 初始化豆瓣功能
-function initDouban() {
-    // 设置豆瓣开关的初始状态
-    const doubanToggle = document.getElementById('doubanToggle');
-    if (doubanToggle) {
-        const isEnabled = localStorage.getItem('doubanEnabled') === 'true';
-        doubanToggle.checked = isEnabled;
-        
-        // 设置开关外观
-        const toggleBg = doubanToggle.nextElementSibling;
-        const toggleDot = toggleBg.nextElementSibling;
-        if (isEnabled) {
-            toggleBg.classList.add('bg-indigo-600');
-            toggleDot.classList.add('translate-x-6');
-        }
-        
-        // 添加事件监听
-        doubanToggle.addEventListener('change', function(e) {
-            const isChecked = e.target.checked;
-            localStorage.setItem('doubanEnabled', isChecked);
-            
-            // 更新开关外观
-            if (isChecked) {
-                toggleBg.classList.add('bg-indigo-600');
-                toggleDot.classList.add('translate-x-6');
-            } else {
-                toggleBg.classList.remove('bg-indigo-600');
-                toggleDot.classList.remove('translate-x-6');
-            }
-            
-            // 更新显示状态
-            updateDoubanVisibility();
-        });
-        
-        // 初始更新显示状态
-        updateDoubanVisibility();
-
-        // 滚动到页面顶部
-        window.scrollTo(0, 0);
-    }
-
-    // 加载用户标签
-    loadUserTags();
-
-    // 渲染电影/电视剧切换
-    renderDoubanMovieTvSwitch();
-    
-    // 渲染豆瓣标签
-    renderDoubanTags();
-    
-    // 换一批按钮事件监听
-    setupDoubanRefreshBtn();
-    
-    // 初始加载热门内容
-    if (localStorage.getItem('doubanEnabled') === 'true') {
-        renderRecommend(doubanCurrentTag, doubanPageSize, doubanPageStart);
-    }
+function getCurrentRuyiCategories() {
+    return RUYI_CATEGORY_GROUPS[doubanMovieTvCurrentSwitch];
 }
 
-// 根据设置更新豆瓣区域的显示状态
+function createRuyiStreams(category) {
+    return category.typeIds.map(typeId => ({
+        typeId,
+        nextPage: 1,
+        pageCount: Infinity,
+        queue: [],
+        noMore: false,
+        pendingRequest: null,
+        consecutiveFailures: 0,
+        retryAfter: 0
+    }));
+}
+
+function resetRuyiFeed(category = getCurrentRuyiCategories()[0]) {
+    ruyiFeedGeneration += 1;
+    doubanCurrentCategory = category;
+    ruyiStreams = createRuyiStreams(category);
+    ruyiSeenVodIds = new Set();
+    doubanLoading = false;
+    doubanNoMore = false;
+    removeDoubanSentinel();
+
+    const container = document.getElementById('douban-results');
+    if (container) container.innerHTML = '';
+}
+
+function syncRecommendationToggle(toggle) {
+    if (!toggle) return;
+
+    const enabled = localStorage.getItem('doubanEnabled') === 'true';
+    toggle.checked = enabled;
+
+    const toggleBg = toggle.nextElementSibling;
+    const toggleDot = toggleBg?.nextElementSibling;
+    toggleBg?.classList.toggle('bg-indigo-600', enabled);
+    toggleDot?.classList.toggle('translate-x-6', enabled);
+}
+
+function initDouban() {
+    const doubanToggle = document.getElementById('doubanToggle');
+
+    if (!doubanInitialized) {
+        doubanInitialized = true;
+        resetRuyiFeed();
+        renderDoubanMovieTvSwitch();
+
+        doubanToggle?.addEventListener('change', event => {
+            localStorage.setItem('doubanEnabled', String(event.target.checked));
+            syncRecommendationToggle(event.target);
+            updateDoubanVisibility();
+        });
+    }
+
+    syncRecommendationToggle(doubanToggle);
+    renderDoubanTags();
+    updateDoubanVisibility();
+}
+
 function updateDoubanVisibility() {
     const doubanArea = document.getElementById('doubanArea');
-    if (!doubanArea) return;
-    
-    const isEnabled = localStorage.getItem('doubanEnabled') === 'true';
-    const isSearching = document.getElementById('resultsArea') && 
-        !document.getElementById('resultsArea').classList.contains('hidden');
-    
-    // 只有在启用且没有搜索结果显示时才显示豆瓣区域
-    if (isEnabled && !isSearching) {
+    const container = document.getElementById('douban-results');
+    if (!doubanArea || !container) return;
+
+    const enabled = localStorage.getItem('doubanEnabled') === 'true';
+    const resultsArea = document.getElementById('resultsArea');
+    const isSearching = resultsArea && !resultsArea.classList.contains('hidden');
+
+    if (enabled && !isSearching) {
         doubanArea.classList.remove('hidden');
-        // 如果豆瓣结果为空，重新加载
-        if (document.getElementById('douban-results').children.length === 0) {
-            renderRecommend(doubanCurrentTag, doubanPageSize, doubanPageStart);
+        if (container.children.length === 0 && !doubanLoading) {
+            renderRecommend();
         }
     } else {
         doubanArea.classList.add('hidden');
     }
 }
 
-// 只填充搜索框，不执行搜索，让用户自主决定搜索时机
-function fillSearchInput(title) {
+async function fillAndSearchWithRuyi(title) {
     if (!title) return;
-    
-    // 安全处理标题，防止XSS
-    const safeTitle = title
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    
-    const input = document.getElementById('searchInput');
-    if (input) {
-        input.value = safeTitle;
-        
-        // 聚焦搜索框，便于用户立即使用键盘操作
-        input.focus();
-        
-        // 显示一个提示，告知用户点击搜索按钮进行搜索
-        showToast('已填充搜索内容，点击搜索按钮开始搜索', 'info');
-    }
-}
 
-// 填充搜索框并执行搜索
-function fillAndSearch(title) {
-    if (!title) return;
-    
-    // 安全处理标题，防止XSS
-    const safeTitle = title
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    
-    const input = document.getElementById('searchInput');
-    if (input) {
-        input.value = safeTitle;
-        search(); // 使用已有的search函数执行搜索
-        
-        // 同时更新浏览器URL，使其反映当前的搜索状态
-        try {
-            // 使用URI编码确保特殊字符能够正确显示
-            const encodedQuery = encodeURIComponent(safeTitle);
-            // 使用HTML5 History API更新URL，不刷新页面
-            window.history.pushState(
-                { search: safeTitle }, 
-                `搜索: ${safeTitle} - 优点TV`, 
-                `/s=${encodedQuery}`
-            );
-            // 更新页面标题
-            document.title = `搜索: ${safeTitle} - 优点TV`;
-        } catch (e) {
-            console.error('更新浏览器历史失败:', e);
-        }
-    }
-}
-
-// 填充搜索框，确保豆瓣资源API被选中，然后执行搜索
-async function fillAndSearchWithDouban(title) {
-    if (!title) return;
-    
-    // 安全处理标题，防止XSS
-    const safeTitle = title
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    
-    // 确保豆瓣资源API被选中
-    if (typeof selectedAPIs !== 'undefined' && !selectedAPIs.includes('dbzy')) {
-        // 在设置中勾选豆瓣资源API复选框
-        const doubanCheckbox = document.querySelector('input[id="api_dbzy"]');
-        if (doubanCheckbox) {
-            doubanCheckbox.checked = true;
-            
-            // 触发updateSelectedAPIs函数以更新状态
+    if (typeof selectedAPIs !== 'undefined' && !selectedAPIs.includes(RUYI_SOURCE_ID)) {
+        const ruyiCheckbox = document.getElementById('api_ruyi');
+        if (ruyiCheckbox) {
+            ruyiCheckbox.checked = true;
             if (typeof updateSelectedAPIs === 'function') {
                 updateSelectedAPIs();
-            } else {
-                // 如果函数不可用，则手动添加到selectedAPIs
-                selectedAPIs.push('dbzy');
-                localStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
-                
-                // 更新选中API计数（如果有这个元素）
-                const countEl = document.getElementById('selectedAPICount');
-                if (countEl) {
-                    countEl.textContent = selectedAPIs.length;
-                }
             }
-            
-            showToast('已自动选择豆瓣资源API', 'info');
+        } else {
+            selectedAPIs.push(RUYI_SOURCE_ID);
+            localStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
+            const countEl = document.getElementById('selectedApiCount');
+            if (countEl) countEl.textContent = selectedAPIs.length;
+        }
+        if (typeof showToast === 'function') {
+            showToast('已自动选择如意资源', 'info');
         }
     }
-    
-    // 填充搜索框并执行搜索
-    const input = document.getElementById('searchInput');
-    if (input) {
-        input.value = safeTitle;
-        await search(); // 使用已有的search函数执行搜索
-        
-        // 更新浏览器URL，使其反映当前的搜索状态
-        try {
-            // 使用URI编码确保特殊字符能够正确显示
-            const encodedQuery = encodeURIComponent(safeTitle);
-            // 使用HTML5 History API更新URL，不刷新页面
-            window.history.pushState(
-                { search: safeTitle }, 
-                `搜索: ${safeTitle} - 优点TV`, 
-                `/s=${encodedQuery}`
-            );
-            // 更新页面标题
-            document.title = `搜索: ${safeTitle} - 优点TV`;
-        } catch (e) {
-            console.error('更新浏览器历史失败:', e);
-        }
 
-        if (window.innerWidth <= 768) {
-          window.scrollTo({
-              top: 0,
-              behavior: 'smooth'
-          });
-        }
+    const input = document.getElementById('searchInput');
+    if (!input) return;
+
+    input.value = title;
+    await search();
+
+    if (window.innerWidth <= 768) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
 
-// 渲染电影/电视剧切换器
-function renderDoubanMovieTvSwitch() {
-    // 获取切换按钮元素
+function updateMovieTvToggleStyles() {
     const movieToggle = document.getElementById('douban-movie-toggle');
     const tvToggle = document.getElementById('douban-tv-toggle');
+    if (!movieToggle || !tvToggle) return;
 
-    if (!movieToggle ||!tvToggle) return;
-
-    movieToggle.addEventListener('click', function() {
-        if (doubanMovieTvCurrentSwitch !== 'movie') {
-            // 更新按钮样式
-            movieToggle.classList.add('bg-indigo-600', 'text-white');
-            movieToggle.classList.remove('text-gray-600');
-            
-            tvToggle.classList.remove('bg-indigo-600', 'text-white');
-            tvToggle.classList.add('text-gray-600');
-            
-            doubanMovieTvCurrentSwitch = 'movie';
-            doubanCurrentTag = '热门';
-            doubanPageStart = 0;
-            doubanNoMore = false;
-            removeDoubanSentinel();
-
-            // 重新加载豆瓣内容
-            renderDoubanTags(movieTags);
-
-            // 换一批按钮事件监听
-            setupDoubanRefreshBtn();
-            
-            // 初始加载热门内容
-            if (localStorage.getItem('doubanEnabled') === 'true') {
-                renderRecommend(doubanCurrentTag, doubanPageSize, doubanPageStart);
-            }
-        }
-    });
-    
-    // 电视剧按钮点击事件
-    tvToggle.addEventListener('click', function() {
-        if (doubanMovieTvCurrentSwitch !== 'tv') {
-            // 更新按钮样式
-            tvToggle.classList.add('bg-indigo-600', 'text-white');
-            tvToggle.classList.remove('text-gray-600');
-            
-            movieToggle.classList.remove('bg-indigo-600', 'text-white');
-            movieToggle.classList.add('text-gray-600');
-            
-            doubanMovieTvCurrentSwitch = 'tv';
-            doubanCurrentTag = '热门';
-            doubanPageStart = 0;
-            doubanNoMore = false;
-            removeDoubanSentinel();
-
-            // 重新加载豆瓣内容
-            renderDoubanTags(tvTags);
-
-            // 换一批按钮事件监听
-            setupDoubanRefreshBtn();
-            
-            // 初始加载热门内容
-            if (localStorage.getItem('doubanEnabled') === 'true') {
-                renderRecommend(doubanCurrentTag, doubanPageSize, doubanPageStart);
-            }
-        }
-    });
+    const movieSelected = doubanMovieTvCurrentSwitch === 'movie';
+    movieToggle.classList.toggle('bg-indigo-600', movieSelected);
+    movieToggle.classList.toggle('text-white', movieSelected);
+    movieToggle.classList.toggle('text-gray-600', !movieSelected);
+    tvToggle.classList.toggle('bg-indigo-600', !movieSelected);
+    tvToggle.classList.toggle('text-white', !movieSelected);
+    tvToggle.classList.toggle('text-gray-600', movieSelected);
 }
 
-// 渲染豆瓣标签选择器
-function renderDoubanTags(tags) {
+function renderDoubanMovieTvSwitch() {
+    const movieToggle = document.getElementById('douban-movie-toggle');
+    const tvToggle = document.getElementById('douban-tv-toggle');
+    if (!movieToggle || !tvToggle) return;
+
+    const switchFeed = type => {
+        if (doubanMovieTvCurrentSwitch === type) return;
+
+        doubanMovieTvCurrentSwitch = type;
+        updateMovieTvToggleStyles();
+        resetRuyiFeed(getCurrentRuyiCategories()[0]);
+        renderDoubanTags();
+
+        if (localStorage.getItem('doubanEnabled') === 'true') {
+            renderRecommend();
+        }
+    };
+
+    movieToggle.addEventListener('click', () => switchFeed('movie'));
+    tvToggle.addEventListener('click', () => switchFeed('tv'));
+    updateMovieTvToggleStyles();
+}
+
+function renderDoubanTags() {
     const tagContainer = document.getElementById('douban-tags');
     if (!tagContainer) return;
-    
-    // 确定当前应该使用的标签列表
-    const currentTags = doubanMovieTvCurrentSwitch === 'movie' ? movieTags : tvTags;
-    
-    // 清空标签容器
+
     tagContainer.innerHTML = '';
+    getCurrentRuyiCategories().forEach(category => {
+        const button = document.createElement('button');
+        const selected = category === doubanCurrentCategory;
+        button.type = 'button';
+        button.className = 'py-1.5 px-3.5 rounded text-sm font-medium transition-all duration-300 border ' +
+            (selected
+                ? 'bg-indigo-600 text-white shadow-md border-indigo-600'
+                : 'bg-white text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 border-[#e5e4de] hover:border-indigo-400');
+        button.textContent = category.label;
 
-    // 先添加标签管理按钮
-    const manageBtn = document.createElement('button');
-    manageBtn.className = 'py-1.5 px-3.5 rounded text-sm font-medium transition-all duration-300 bg-white text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 border border-[#e5e4de] hover:border-indigo-400';
-    manageBtn.innerHTML = '<span class="flex items-center"><svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>管理标签</span>';
-    manageBtn.onclick = function() {
-        showTagManageModal();
-    };
-    tagContainer.appendChild(manageBtn);
-
-    // 添加所有标签
-    currentTags.forEach(tag => {
-        const btn = document.createElement('button');
-        
-        // 设置样式
-        let btnClass = 'py-1.5 px-3.5 rounded text-sm font-medium transition-all duration-300 border ';
-        
-        // 当前选中的标签使用高亮样式
-        if (tag === doubanCurrentTag) {
-            btnClass += 'bg-indigo-600 text-white shadow-md border-indigo-600';
-        } else {
-            btnClass += 'bg-white text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 border-[#e5e4de] hover:border-indigo-400';
-        }
-        
-        btn.className = btnClass;
-        btn.textContent = tag;
-        
-        btn.onclick = function() {
-            if (doubanCurrentTag !== tag) {
-                doubanCurrentTag = tag;
-                doubanPageStart = 0;
-                doubanNoMore = false;
-                removeDoubanSentinel();
-                renderRecommend(doubanCurrentTag, doubanPageSize, doubanPageStart);
-                renderDoubanTags();
+        button.addEventListener('click', () => {
+            if (category === doubanCurrentCategory) return;
+            resetRuyiFeed(category);
+            renderDoubanTags();
+            if (localStorage.getItem('doubanEnabled') === 'true') {
+                renderRecommend();
             }
-        };
-        
-        tagContainer.appendChild(btn);
+        });
+
+        tagContainer.appendChild(button);
     });
 }
 
-
-// Infinite scroll sentinel setup
 function setupDoubanSentinel() {
     if (doubanNoMore) return;
-    const container = document.getElementById("douban-results");
+
+    const container = document.getElementById('douban-results');
     if (!container) return;
 
-    // Remove existing sentinel
     removeDoubanSentinel();
-
     const sentinel = document.createElement('div');
     sentinel.id = 'douban-scroll-sentinel';
     sentinel.className = 'col-span-full h-4';
     container.appendChild(sentinel);
 
-    if (doubanObserver) doubanObserver.disconnect();
-    doubanObserver = new IntersectionObserver((entries) => {
+    doubanObserver = new IntersectionObserver(entries => {
         if (entries[0].isIntersecting && !doubanLoading && !doubanNoMore) {
-            renderRecommend(doubanCurrentTag, doubanPageSize, doubanPageStart, true);
+            renderRecommend(true);
         }
     }, { rootMargin: '200px' });
     doubanObserver.observe(sentinel);
@@ -405,454 +252,335 @@ function removeDoubanSentinel() {
         doubanObserver.disconnect();
         doubanObserver = null;
     }
-    const sentinel = document.getElementById('douban-scroll-sentinel');
-    if (sentinel) sentinel.remove();
+    document.getElementById('douban-scroll-sentinel')?.remove();
 }
 
-function fetchDoubanTags() {
-    const movieTagsTarget = `https://movie.douban.com/j/search_tags?type=movie`
-    fetchDoubanData(movieTagsTarget)
-        .then(data => {
-            movieTags = data.tags;
-            if (doubanMovieTvCurrentSwitch === 'movie') {
-                renderDoubanTags(movieTags);
-            }
-        })
-        .catch(error => {
-            console.error("获取优点热门电影标签失败：", error);
-        });
-    const tvTagsTarget = `https://movie.douban.com/j/search_tags?type=tv`
-    fetchDoubanData(tvTagsTarget)
-       .then(data => {
-            tvTags = data.tags;
-            if (doubanMovieTvCurrentSwitch === 'tv') {
-                renderDoubanTags(tvTags);
-            }
-        })
-       .catch(error => {
-            console.error("获取优点热门电视剧标签失败：", error);
-        });
+function getRuyiTimestamp(item) {
+    const rawTime = String(item?.vod_time || '').trim();
+    if (!rawTime) return 0;
+    const timestamp = Date.parse(rawTime.replace(' ', 'T'));
+    return Number.isNaN(timestamp) ? 0 : timestamp;
 }
 
-// 渲染热门推荐内容
-function renderRecommend(tag, pageLimit, pageStart, append = false) {
-    const container = document.getElementById("douban-results");
-    if (!container) return;
-    if (doubanLoading) return;
+function compareRuyiItemsNewestFirst(left, right) {
+    const timeDifference = getRuyiTimestamp(right) - getRuyiTimestamp(left);
+    if (timeDifference !== 0) return timeDifference;
+    return Number(right?.vod_id || 0) - Number(left?.vod_id || 0);
+}
+
+function waitForRuyiRetry(delay) {
+    return new Promise(resolve => setTimeout(resolve, delay));
+}
+
+async function fetchRuyiStreamPage(stream, generation) {
+    if (stream.noMore || generation !== ruyiFeedGeneration) return;
+    if (stream.pendingRequest) return stream.pendingRequest;
+
+    const request = (async () => {
+        let lastError = null;
+
+        for (let attempt = 1; attempt <= RUYI_MAX_REQUEST_ATTEMPTS; attempt += 1) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), RUYI_REQUEST_TIMEOUT);
+
+            try {
+                const target = new URL(API_SITES[RUYI_SOURCE_ID].api);
+                target.searchParams.set('ac', 'videolist');
+                target.searchParams.set('t', String(stream.typeId));
+                target.searchParams.set('pg', String(stream.nextPage));
+                // Cloudflare 的代理缓存默认较长；时间桶让“最新”列表最多延迟约五分钟。
+                target.searchParams.set('_latest', String(Math.floor(Date.now() / RUYI_CACHE_BUCKET_MS)));
+
+                const proxyPath = PROXY_URL + encodeURIComponent(target.toString());
+                const requestUrl = window.ProxyAuth?.addAuthToProxyUrl
+                    ? await window.ProxyAuth.addAuthToProxyUrl(proxyPath)
+                    : proxyPath;
+                const response = await fetch(requestUrl, {
+                    headers: API_CONFIG.search.headers,
+                    signal: controller.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error(`如意资源请求失败 (${response.status})`);
+                }
+
+                const data = await response.json();
+                if (generation !== ruyiFeedGeneration) return;
+
+                const items = Array.isArray(data?.list) ? data.list.slice() : [];
+                items.sort(compareRuyiItemsNewestFirst);
+                stream.queue.push(...items);
+
+                const returnedPage = Number(data?.page || stream.nextPage);
+                stream.pageCount = Number(data?.pagecount || returnedPage || 1);
+                stream.nextPage = returnedPage + 1;
+                stream.consecutiveFailures = 0;
+                stream.retryAfter = 0;
+                if (items.length === 0 || returnedPage >= stream.pageCount) {
+                    stream.noMore = true;
+                }
+                return;
+            } catch (error) {
+                lastError = error;
+                if (generation !== ruyiFeedGeneration) return;
+                if (attempt < RUYI_MAX_REQUEST_ATTEMPTS) {
+                    await waitForRuyiRetry(RUYI_RETRY_BASE_DELAY * attempt);
+                }
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
+
+        stream.consecutiveFailures += 1;
+        stream.retryAfter = Date.now() + Math.min(
+            30000,
+            RUYI_RETRY_BASE_DELAY * (2 ** (stream.consecutiveFailures - 1))
+        );
+        throw lastError || new Error('如意资源请求失败');
+    })();
+
+    stream.pendingRequest = request;
+    try {
+        return await request;
+    } finally {
+        if (stream.pendingRequest === request) {
+            stream.pendingRequest = null;
+        }
+    }
+}
+
+async function refillEmptyRuyiStreams(generation, attemptedStreams) {
+    const now = Date.now();
+    const streamsToRefill = ruyiStreams.filter(stream =>
+        stream.queue.length === 0 &&
+        !stream.noMore &&
+        stream.retryAfter <= now &&
+        !attemptedStreams.has(stream)
+    );
+    streamsToRefill.forEach(stream => attemptedStreams.add(stream));
+
+    await Promise.all(streamsToRefill.map(async stream => {
+        try {
+            await fetchRuyiStreamPage(stream, generation);
+        } catch (error) {
+            console.warn(`如意资源分类 ${stream.typeId} 暂时加载失败:`, error);
+        }
+    }));
+}
+
+async function takeLatestRuyiItems(limit, generation) {
+    const items = [];
+    const attemptedStreams = new Set();
+
+    while (items.length < limit && generation === ruyiFeedGeneration) {
+        await refillEmptyRuyiStreams(generation, attemptedStreams);
+        if (generation !== ruyiFeedGeneration) return [];
+
+        const availableStreams = ruyiStreams.filter(stream => stream.queue.length > 0);
+        if (availableStreams.length === 0) break;
+
+        let newestStream = availableStreams[0];
+        for (let index = 1; index < availableStreams.length; index += 1) {
+            if (compareRuyiItemsNewestFirst(availableStreams[index].queue[0], newestStream.queue[0]) < 0) {
+                newestStream = availableStreams[index];
+            }
+        }
+
+        const item = newestStream.queue.shift();
+        const itemKey = String(item?.vod_id || `${item?.vod_name || ''}:${item?.vod_time || ''}`);
+        if (ruyiSeenVodIds.has(itemKey)) continue;
+
+        ruyiSeenVodIds.add(itemKey);
+        items.push(item);
+    }
+
+    return items;
+}
+
+function hasMoreRuyiItems() {
+    return ruyiStreams.some(stream => stream.queue.length > 0 || !stream.noMore);
+}
+
+function formatRuyiDate(rawTime) {
+    const match = String(rawTime || '').match(/^\d{4}-\d{2}-\d{2}/);
+    return match ? match[0] : '最近更新';
+}
+
+function normalizeCoverUrl(rawUrl) {
+    if (!rawUrl) return null;
+    const normalized = String(rawUrl).trim().replace(/^\/\//, 'https://');
+
+    try {
+        const parsed = new URL(normalized);
+        const hostname = parsed.hostname.toLowerCase();
+        const trustedHost = hostname === RUYI_COVER_HOST_SUFFIX ||
+            hostname.endsWith(`.${RUYI_COVER_HOST_SUFFIX}`);
+        if (!trustedHost || parsed.username || parsed.password || (parsed.port && parsed.port !== '443')) {
+            return null;
+        }
+
+        parsed.protocol = 'https:';
+        return parsed.toString();
+    } catch {
+        return null;
+    }
+}
+
+function getRuyiCoverUrl(rawUrl) {
+    // 图片直接从如意的受信 CDN 加载，不把供应商控制的 URL 交给服务端代理。
+    return normalizeCoverUrl(rawUrl) || 'image/nomedia.png';
+}
+
+async function renderRuyiCards(items, container, append, generation) {
+    const fragment = document.createDocumentFragment();
+    const coverUrls = items.map(item => getRuyiCoverUrl(item.vod_pic));
+
+    if (generation !== ruyiFeedGeneration) return;
+
+    items.forEach((item, index) => {
+        const title = String(item.vod_name || '未命名影片');
+        const card = document.createElement('article');
+        card.className = 'bg-[#f5f4ee] hover:bg-[#eae9e3] transition-all duration-300 rounded-lg overflow-hidden flex flex-col transform hover:scale-105 shadow-md hover:shadow-lg';
+
+        const posterButton = document.createElement('button');
+        posterButton.type = 'button';
+        posterButton.className = 'relative w-full aspect-[2/3] overflow-hidden cursor-pointer text-left';
+        posterButton.setAttribute('aria-label', `搜索 ${title}`);
+        posterButton.addEventListener('click', () => fillAndSearchWithRuyi(title));
+
+        const image = document.createElement('img');
+        image.src = coverUrls[index];
+        image.alt = title;
+        image.className = 'w-full h-full object-cover transition-transform duration-500 hover:scale-110';
+        image.loading = 'lazy';
+        image.referrerPolicy = 'no-referrer';
+        image.addEventListener('error', () => {
+            image.src = 'image/nomedia.png';
+            image.classList.add('object-contain');
+        }, { once: true });
+
+        const gradient = document.createElement('span');
+        gradient.className = 'absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60 pointer-events-none';
+
+        const dateBadge = document.createElement('span');
+        dateBadge.className = 'absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm';
+        dateBadge.textContent = formatRuyiDate(item.vod_time);
+
+        const sourceBadge = document.createElement('span');
+        sourceBadge.className = 'absolute top-2 right-2 bg-indigo-600/90 text-white text-xs px-2 py-1 rounded-sm';
+        sourceBadge.textContent = item.type_name || '如意资源';
+
+        posterButton.append(image, gradient, dateBadge, sourceBadge);
+
+        const cardBody = document.createElement('div');
+        cardBody.className = 'p-2 text-center bg-[#f5f4ee]';
+
+        const titleButton = document.createElement('button');
+        titleButton.type = 'button';
+        titleButton.className = 'text-sm font-medium text-gray-800 truncate w-full hover:text-indigo-400 transition';
+        titleButton.textContent = title;
+        titleButton.title = item.vod_remarks ? `${title} · ${item.vod_remarks}` : title;
+        titleButton.addEventListener('click', () => fillAndSearchWithRuyi(title));
+
+        cardBody.appendChild(titleButton);
+        card.append(posterButton, cardBody);
+        fragment.appendChild(card);
+    });
+
+    if (!append) container.innerHTML = '';
+    container.appendChild(fragment);
+}
+
+function renderRuyiRetry(container, append) {
+    document.getElementById('ruyi-retry-indicator')?.remove();
+    if (!append) container.innerHTML = '';
+
+    const status = document.createElement('div');
+    status.id = 'ruyi-retry-indicator';
+    status.className = 'col-span-full flex flex-col items-center justify-center gap-3 py-6 text-sm text-gray-500';
+
+    const message = document.createElement('span');
+    message.textContent = '部分如意资源暂时加载失败';
+
+    const retryButton = document.createElement('button');
+    retryButton.type = 'button';
+    retryButton.className = 'px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors';
+    retryButton.textContent = '重试';
+    retryButton.addEventListener('click', () => {
+        status.remove();
+        ruyiStreams.forEach(stream => {
+            stream.retryAfter = 0;
+        });
+        renderRecommend(append);
+    });
+
+    status.append(message, retryButton);
+    container.appendChild(status);
+}
+
+async function renderRecommend(append = false) {
+    const container = document.getElementById('douban-results');
+    if (!container || doubanLoading || doubanNoMore) return;
+
+    const generation = ruyiFeedGeneration;
     doubanLoading = true;
+    removeDoubanSentinel();
+    document.getElementById('ruyi-retry-indicator')?.remove();
 
-    // Show loading indicator at the bottom
     const loadingEl = document.createElement('div');
     loadingEl.id = 'douban-loading-indicator';
     loadingEl.className = 'col-span-full flex items-center justify-center py-6';
     loadingEl.innerHTML = `
         <div class="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin inline-block"></div>
-        <span class="text-indigo-500 ml-4">加载中...</span>
+        <span class="text-indigo-500 ml-4">正在加载如意资源最新内容...</span>
     `;
 
-    if (append) {
-        container.appendChild(loadingEl);
-    } else {
-        container.innerHTML = '';
-        container.appendChild(loadingEl);
-    }
+    if (!append) container.innerHTML = '';
+    container.appendChild(loadingEl);
 
-    const target = `https://movie.douban.com/j/search_subjects?type=${doubanMovieTvCurrentSwitch}&tag=${tag}&sort=rank&page_limit=${pageLimit}&page_start=${pageStart}`;
+    try {
+        const items = await takeLatestRuyiItems(RUYI_FEED_BATCH_SIZE, generation);
+        if (generation !== ruyiFeedGeneration) return;
 
-    fetchDoubanData(target)
-        .then(data => {
-            // Remove loading indicator
-            const loader = document.getElementById('douban-loading-indicator');
-            if (loader) loader.remove();
+        loadingEl.remove();
+        if (items.length === 0) {
+            const canRetry = hasMoreRuyiItems();
+            doubanNoMore = !canRetry;
 
-            if (!data.subjects || data.subjects.length === 0) {
-                doubanNoMore = true;
-                if (!append) {
-                    container.innerHTML = `
-                        <div class="col-span-full text-center py-8">
-                            <div class="text-indigo-500">❌ 暂无数据，请尝试其他分类或刷新</div>
-                        </div>
-                    `;
-                }
-                removeDoubanSentinel();
-                doubanLoading = false;
-                return;
-            }
-
-            renderDoubanCards(data, container, append).then(() => {
-                doubanLoading = false;
-                doubanPageStart += doubanPageSize;
-                setupDoubanSentinel();
-            });
-        })
-        .catch(error => {
-            console.error("获取豆瓣数据失败：", error);
-            const loader = document.getElementById('douban-loading-indicator');
-            if (loader) loader.remove();
-            if (!append) {
+            if (canRetry) {
+                renderRuyiRetry(container, append);
+            } else if (!append) {
                 container.innerHTML = `
                     <div class="col-span-full text-center py-8">
-                        <div class="text-red-400">❌ 获取豆瓣数据失败，请稍后重试</div>
-                        <div class="text-gray-500 text-sm mt-2">提示：使用VPN可能有助于解决此问题</div>
+                        <div class="text-indigo-500">暂无如意资源内容</div>
                     </div>
                 `;
             }
+            return;
+        }
+
+        await renderRuyiCards(items, container, append, generation);
+        if (generation !== ruyiFeedGeneration) return;
+
+        doubanNoMore = !hasMoreRuyiItems();
+        doubanLoading = false;
+        if (!doubanNoMore) setupDoubanSentinel();
+    } catch (error) {
+        if (generation !== ruyiFeedGeneration) return;
+
+        console.error('获取如意资源最新内容失败:', error);
+        loadingEl.remove();
+        renderRuyiRetry(container, append);
+    } finally {
+        if (generation === ruyiFeedGeneration) {
             doubanLoading = false;
-        });
-}
-
-async function fetchDoubanData(url) {
-    // 添加超时控制
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
-    
-    // 设置请求选项，包括信号和头部
-    const fetchOptions = {
-        signal: controller.signal,
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-            'Referer': 'https://movie.douban.com/',
-            'Accept': 'application/json, text/plain, */*',
-        }
-    };
-
-    try {
-        // 添加鉴权参数到代理URL
-        const proxiedUrl = await window.ProxyAuth?.addAuthToProxyUrl ? 
-            await window.ProxyAuth.addAuthToProxyUrl(PROXY_URL + encodeURIComponent(url)) :
-            PROXY_URL + encodeURIComponent(url);
-            
-        // 尝试直接访问（豆瓣API可能允许部分CORS请求）
-        const response = await fetch(proxiedUrl, fetchOptions);
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        return await response.json();
-    } catch (err) {
-        console.error("豆瓣 API 请求失败（直接代理）：", err);
-        
-        // 失败后尝试备用方法：作为备选
-        const fallbackUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-        
-        try {
-            const fallbackResponse = await fetch(fallbackUrl);
-            
-            if (!fallbackResponse.ok) {
-                throw new Error(`备用API请求失败! 状态: ${fallbackResponse.status}`);
-            }
-            
-            const data = await fallbackResponse.json();
-            
-            // 解析原始内容
-            if (data && data.contents) {
-                return JSON.parse(data.contents);
-            } else {
-                throw new Error("无法获取有效数据");
-            }
-        } catch (fallbackErr) {
-            console.error("豆瓣 API 备用请求也失败：", fallbackErr);
-            throw fallbackErr; // 向上抛出错误，让调用者处理
         }
     }
 }
 
-// 抽取渲染豆瓣卡片的逻辑到单独函数
-async function renderDoubanCards(data, container, append = false) {
-    const fragment = document.createDocumentFragment();
-
-    if (!data.subjects || data.subjects.length === 0) {
-        if (!append) {
-            const emptyEl = document.createElement("div");
-            emptyEl.className = "col-span-full text-center py-8";
-            emptyEl.innerHTML = `
-                <div class="text-indigo-500">❌ 暂无数据，请尝试其他分类或刷新</div>
-            `;
-            fragment.appendChild(emptyEl);
-        }
-    } else {
-        // Shuffle cards randomly on each render
-        for (let i = data.subjects.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [data.subjects[i], data.subjects[j]] = [data.subjects[j], data.subjects[i]];
-        }
-
-        const authProxyUrls = await Promise.all(
-            data.subjects.map(async (item) => {
-                const proxiedUrl = PROXY_URL + encodeURIComponent(item.cover);
-                if (window.ProxyAuth?.addAuthToProxyUrl) {
-                    return await window.ProxyAuth.addAuthToProxyUrl(proxiedUrl);
-                }
-                return proxiedUrl;
-            })
-        );
-
-        data.subjects.forEach((item, index) => {
-            const card = document.createElement("div");
-            card.className = "bg-[#f5f4ee] hover:bg-[#eae9e3] transition-all duration-300 rounded-lg overflow-hidden flex flex-col transform hover:scale-105 shadow-md hover:shadow-lg";
-
-            const safeTitle = item.title
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
-
-            const safeRate = (item.rate || "暂无")
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-
-            const coverUrl = authProxyUrls[index];
-
-            card.innerHTML = `
-                <div class="relative w-full aspect-[2/3] overflow-hidden cursor-pointer" onclick="fillAndSearchWithDouban('${safeTitle}')">
-                    <img src="${coverUrl}" alt="${safeTitle}"
-                        class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                        onerror="this.onerror=null; this.src='image/nomedia.png'; this.classList.add('object-contain');"
-                        loading="lazy" referrerpolicy="no-referrer">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
-                    <div class="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm">
-                        <span class="text-yellow-400">★</span> ${safeRate}
-                    </div>
-                </div>
-                <div class="p-2 text-center bg-[#f5f4ee]">
-                    <button onclick="fillAndSearchWithDouban('${safeTitle}')"
-                            class="text-sm font-medium text-gray-800 truncate w-full hover:text-indigo-400 transition"
-                            title="${safeTitle}">
-                        ${safeTitle}
-                    </button>
-                </div>
-            `;
-
-            fragment.appendChild(card);
-        });
-    }
-
-    if (!append) {
-        container.innerHTML = "";
-    }
-    container.appendChild(fragment);
-}
-
-
-// 重置到首页
 function resetToHome() {
     resetSearchArea();
     updateDoubanVisibility();
 }
 
-// 加载豆瓣首页内容
 document.addEventListener('DOMContentLoaded', initDouban);
-
-// 显示标签管理模态框
-function showTagManageModal() {
-    // 确保模态框在页面上只有一个实例
-    let modal = document.getElementById('tagManageModal');
-    if (modal) {
-        document.body.removeChild(modal);
-    }
-    
-    // 创建模态框元素
-    modal = document.createElement('div');
-    modal.id = 'tagManageModal';
-    modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40';
-    
-    // 当前使用的标签类型和默认标签
-    const isMovie = doubanMovieTvCurrentSwitch === 'movie';
-    const currentTags = isMovie ? movieTags : tvTags;
-    const defaultTags = isMovie ? defaultMovieTags : defaultTvTags;
-    
-    // 模态框内容
-    modal.innerHTML = `
-        <div class="bg-[#f5f4ee] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
-            <button id="closeTagModal" class="absolute top-4 right-4 text-gray-500 hover:text-indigo-600 text-xl">&times;</button>
-            
-            <h3 class="text-xl font-bold text-gray-800 mb-4">标签管理 (${isMovie ? '电影' : '电视剧'})</h3>
-            
-            <div class="mb-4">
-                <div class="flex justify-between items-center mb-2">
-                    <h4 class="text-lg font-medium text-gray-600">标签列表</h4>
-                    <button id="resetTagsBtn" class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded">
-                        恢复默认标签
-                    </button>
-                </div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4" id="tagsGrid">
-                    ${currentTags.length ? currentTags.map(tag => {
-                        // "热门"标签不能删除
-                        const canDelete = tag !== '热门';
-                        return `
-                            <div class="bg-white text-gray-600 py-1.5 px-3 rounded text-sm font-medium flex justify-between items-center group">
-                                <span>${tag}</span>
-                                ${canDelete ? 
-                                    `<button class="delete-tag-btn text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" 
-                                        data-tag="${tag}">✕</button>` : 
-                                    `<span class="text-gray-500 text-xs italic opacity-0 group-hover:opacity-100">必需</span>`
-                                }
-                            </div>
-                        `;
-                    }).join('') : 
-                    `<div class="col-span-full text-center py-4 text-gray-500">无标签，请添加或恢复默认</div>`}
-                </div>
-            </div>
-            
-            <div class="border-t border-gray-700 pt-4">
-                <h4 class="text-lg font-medium text-gray-600 mb-3">添加新标签</h4>
-                <form id="addTagForm" class="flex items-center">
-                    <input type="text" id="newTagInput" placeholder="输入标签名称..." 
-                           class="flex-1 bg-[#eae9e3] text-gray-800 border border-[#e5e4de] rounded px-3 py-2 focus:outline-none focus:border-indigo-500">
-                    <button type="submit" class="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">添加</button>
-                </form>
-                <p class="text-xs text-gray-500 mt-2">提示：标签名称不能为空，不能重复，不能包含特殊字符</p>
-            </div>
-        </div>
-    `;
-    
-    // 添加模态框到页面
-    document.body.appendChild(modal);
-    
-    // 焦点放在输入框上
-    setTimeout(() => {
-        document.getElementById('newTagInput').focus();
-    }, 100);
-    
-    // 添加事件监听器 - 关闭按钮
-    document.getElementById('closeTagModal').addEventListener('click', function() {
-        document.body.removeChild(modal);
-    });
-    
-    // 添加事件监听器 - 点击模态框外部关闭
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            document.body.removeChild(modal);
-        }
-    });
-    
-    // 添加事件监听器 - 恢复默认标签按钮
-    document.getElementById('resetTagsBtn').addEventListener('click', function() {
-        resetTagsToDefault();
-        showTagManageModal(); // 重新加载模态框
-    });
-    
-    // 添加事件监听器 - 删除标签按钮
-    const deleteButtons = document.querySelectorAll('.delete-tag-btn');
-    deleteButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const tagToDelete = this.getAttribute('data-tag');
-            deleteTag(tagToDelete);
-            showTagManageModal(); // 重新加载模态框
-        });
-    });
-    
-    // 添加事件监听器 - 表单提交
-    document.getElementById('addTagForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const input = document.getElementById('newTagInput');
-        const newTag = input.value.trim();
-        
-        if (newTag) {
-            addTag(newTag);
-            input.value = '';
-            showTagManageModal(); // 重新加载模态框
-        }
-    });
-}
-
-// 添加标签
-function addTag(tag) {
-    // 安全处理标签名，防止XSS
-    const safeTag = tag
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    
-    // 确定当前使用的是电影还是电视剧标签
-    const isMovie = doubanMovieTvCurrentSwitch === 'movie';
-    const currentTags = isMovie ? movieTags : tvTags;
-    
-    // 检查是否已存在（忽略大小写）
-    const exists = currentTags.some(
-        existingTag => existingTag.toLowerCase() === safeTag.toLowerCase()
-    );
-    
-    if (exists) {
-        showToast('标签已存在', 'warning');
-        return;
-    }
-    
-    // 添加到对应的标签数组
-    if (isMovie) {
-        movieTags.push(safeTag);
-    } else {
-        tvTags.push(safeTag);
-    }
-    
-    // 保存到本地存储
-    saveUserTags();
-    
-    // 重新渲染标签
-    renderDoubanTags();
-    
-    showToast('标签添加成功', 'success');
-}
-
-// 删除标签
-function deleteTag(tag) {
-    // 热门标签不能删除
-    if (tag === '热门') {
-        showToast('热门标签不能删除', 'warning');
-        return;
-    }
-    
-    // 确定当前使用的是电影还是电视剧标签
-    const isMovie = doubanMovieTvCurrentSwitch === 'movie';
-    const currentTags = isMovie ? movieTags : tvTags;
-    
-    // 寻找标签索引
-    const index = currentTags.indexOf(tag);
-    
-    // 如果找到标签，则删除
-    if (index !== -1) {
-        currentTags.splice(index, 1);
-        
-        // 保存到本地存储
-        saveUserTags();
-        
-        // 如果当前选中的是被删除的标签，则重置为"热门"
-        if (doubanCurrentTag === tag) {
-            doubanCurrentTag = '热门';
-            doubanPageStart = 0;
-            renderRecommend(doubanCurrentTag, doubanPageSize, doubanPageStart);
-        }
-        
-        // 重新渲染标签
-        renderDoubanTags();
-        
-        showToast('标签删除成功', 'success');
-    }
-}
-
-// 重置为默认标签
-function resetTagsToDefault() {
-    // 确定当前使用的是电影还是电视剧
-    const isMovie = doubanMovieTvCurrentSwitch === 'movie';
-    
-    // 重置为默认标签
-    if (isMovie) {
-        movieTags = [...defaultMovieTags];
-    } else {
-        tvTags = [...defaultTvTags];
-    }
-    
-    // 设置当前标签为热门
-    doubanCurrentTag = '热门';
-    doubanPageStart = 0;
-    
-    // 保存到本地存储
-    saveUserTags();
-    
-    // 重新渲染标签和内容
-    renderDoubanTags();
-    renderRecommend(doubanCurrentTag, doubanPageSize, doubanPageStart);
-    
-    showToast('已恢复默认标签', 'success');
-}
